@@ -1,13 +1,18 @@
 module pc_reg #(
-    parameter ADDRESS_WIDTH = 32
+    parameter WIDTH = 32
 )(
-    input logic [ADDRESS_WIDTH-1:0]  next_pc,
-    input logic                      clk,
-    input logic                      rst,
-    output logic [ADDRESS_WIDTH-1:0] pc       
+    input logic [WIDTH-1:0] next_PC;
+    input logic clk;
+    input logic rst;
+    output logic [WIDTH-1:0] PC;
 );
 
-always_ff @(posedge clk) 
-    if (rst) pc <= {ADDRESS_WIDTH{1'b0}};
-    else pc <= next_pc;
+always_ff @(posedge clk) begin
+    if (rst) begin
+        PC <= {WIDTH{1'b0}};
+    end 
+    else begin
+        PC <= next_PC;
+    end 
+end
 endmodule
