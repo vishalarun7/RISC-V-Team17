@@ -13,7 +13,7 @@ Schematic
 |------------------------------|:------:|:------:|:----:|:----:|
 | **alu**                      |        |  X     |     |      |
 | **instr_mem**                |   X    |        |      |      |
-| **pc_register**              |   *    |        |  X    |     |
+| **pc_register**              |   *    |   *     |  X    |     |
 | **datamem**                  |   X    |       |      |      |
 | **control**                  |        |   X    |      |      |
 | **reg_file**                 |        |   X     |     |      |
