@@ -1,5 +1,5 @@
 // 00:I, 01:S, 10:B
-module immext(
+module ImmExt(
   input  logic [31:0] instr,
   input  logic [1:0]  ImmSrc,        
   output logic [31:0] ImmExt

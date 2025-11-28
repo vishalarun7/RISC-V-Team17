@@ -1,38 +1,56 @@
 #include "instr_mem.sv"
 #include "pc_register.sv"
 #include "control.sv"
+#include "ImmExt.sv"
+#include "4mux.sv"
 
 module fetch_top(
     parameter WIDTH = 32, 
-    parameter ADDRESS_WIDTH = 32, 
 )(
     input logic clk, 
     input logic rst, 
-    input logic [WIDTH-1:0] PCnext,
     input logic [1:0] PCSrc, 
-    input logic 
+    input logic [DATA_WIDTH-1:0] Result,
+    input logic [DATA_WIDTH-1:0] ImmExt,
     ouput logic [ADDRESS_WIDTH-1:0] instr
 
 );(
-    logic [WIDTH-1:0] PC,
-    logic [ADDRESS_WIDTH-1:0] addr
+    logic [DATA_WIDTH-1:0] PC;
+    logic [DATA_WIDTH-1:0] PCPlus4;
+    logic [DATA_WIDTH-1:0] PCTarget;
+    logic [DATA_WIDTH-1:0] PCNext;
 )
 
-    addr PCPlus4(
-        PCPlus4 = PC + 4;
-    )
+    adder PCPlus4(
+        .in0 (PC),
+        .in1 (32'd4),
+        .out (PCPlus4)
+    );
 
-    addr PCTarget(
-        PCTarget = PC + Immext;
-    )
+    adder PCTarget(
+        .in0(PC),
+        .in1(ImmExt)
+        .out (PCTarget)
+    );
+
     pc_reg PC_REG(
         .clk (clk),
         .rst (rst), 
         .PCnext (PCnext),
-        .PC (PC)
+        .C (PC)
+    );
+
+    4mux PCMux(
+        .in0 (PCPlus4),
+        .in1 (PCTarget),
+        .in2 (Result),
+        .in3 (PC),
+        .sel (PCSrc),
+        .out (PCNext)
     );
 
     instr_mem INSTR_MEM(
-        .addr (addr)
+        .addr (PC)
         .instr (instr)
-    )
+    );
+endmodule
