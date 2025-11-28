@@ -7,19 +7,24 @@ This single cycle implementation covers the basic requirements for most CPU oper
 Schematic 
 <img width="6055" height="3297" alt="image" src="https://github.com/user-attachments/assets/943ed4a2-d1c2-4782-9086-019f564687ae" />
 
-Contributions
-Module	Vishal	Nikhil	Emir	Raph
-alu				X
-instr_mem X				
-pc_register	*			X
-datamem		X		
-control		X		
-reg_file		X		
-signextend	X			
-top (system integration)				
-F1 Assembly.s				
-System Testing and Debugging				
-PDF testing				
-F1 Testing		
-X - Lead Contributor * - Partial Contributor
+## Contributions
+
+| Module                       | Vishal | Nikhil | Emir | Raph |
+|------------------------------|:------:|:------:|:----:|:----:|
+| **alu**                      |        |  X     |     |      |
+| **instr_mem**                |   X    |        |      |      |
+| **pc_register**              |   *    |        |  X    |     |
+| **datamem**                  |   X    |       |      |      |
+| **control**                  |        |   X    |      |      |
+| **reg_file**                 |        |   X     |     |      |
+| **signextend**               |   X    |        |      |      |
+| **top (system integration)** |        |        |      |      |
+| **F1 Assembly.s**            |        |        |      |      |
+| **System Testing & Debugging** |     |        |      |      |
+| **PDF testing**              |        |        |      |      |
+| **F1 Testing**               |        |        |      |      |
+
+**X = Lead Contributor**  
+**\* = Partial Contributor**
+
 
