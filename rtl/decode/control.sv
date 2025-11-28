@@ -1,6 +1,7 @@
 module control(
   input  logic [31:0] instr,
-  input  logic        Zero,         
+  input logic         Zero, 
+  input logic         Negative,         
   output logic        RegWrite,
   output logic        MemWrite,
   output logic        ALUSrc,
