@@ -1,102 +1,114 @@
 module control(
-  input  logic [31:0] instr,
-  input logic         Zero, 
-  input logic         Negative,         
-  output logic        RegWrite,
-  output logic        MemWrite,
-  output logic        ALUSrc,
-  output logic        ResultSrc,
+  input  logic [6:0]  op,       // opcode
+  input  logic [2:0]  funct3,
+  input  logic        funct7,   // bit [30],
+  input logic         Zero,     //flag for when two values are equal 
+  input logic         Negative, //flag for when a value is negative   
+
+  output logic        RegWrite, //enable for regfile
+  output logic        MemWrite, //enable for datamem
+  output logic        ALUSrc,   //select for SrcB to ALU
+  output logic        ResultSrc,//Result mux sel line; 00 = ALU result; 01 = Datamem; 10 = Pcplus4 (jal, jalr); 11 = Imm
   output logic        Branch,
-  output logic [1:0]  ImmSrc,
-  output logic [1:0]  ALUOp,
-  output logic [2:0]  ALUControl,
-  output logic        PCSrc
+  output logic        Jump, 
+  output logic [1:0]  ImmSrc,     //Imm-type
+  output logic [1:0]  PCSrc,     //pc mux sel line; 0 = pc+4 ; 1 = pc+imm (branch,jal); 2 = aluresult (jalr) ; 3 = pc (stall)
+  output logic [3:0]  ALUControl,//controls the operation to be performed in ALU
+  output logic        AddrMode   //byte (0) and word (1) addressing 
 );
-    //extract op,func3 and 7 from instr
-  logic [6:0] op      = instr[6:0];
-  logic [2:0] funct3  = instr[14:12];
-  logic       funct7_5= instr[30];
 
-  localparam OPC_LW   = 7'b0000011;
-  localparam OPC_SW   = 7'b0100011;
-  localparam OPC_R    = 7'b0110011;
-  localparam OPC_BEQ  = 7'b1100011;
+  task ALU_control(
+      input   logic [6:0] op_code,
+      input   logic [2:0] funct_3,
+      input   logic       funct_7,
+      output  logic [3:0] ALU_control
+  );
+      begin
+          case (funct_3)
+              3'd0: if (op_code == 7'b0010011) ALU_control = 4'b0000;
+                    else   ALU_control = funct_7 ? 4'b0001 : 4'b0000; // add | addi (funct7 = 0) or sub (funct7 = 1)
+              3'd1: ALU_control = 4'b0101; // sll | slli
+              3'd2: ALU_control = 4'b1000; // slt | slti
+              3'd3: ALU_control = 4'b1001; // sltu | sltiu
+              3'd4: ALU_control = 4'b0100; // xor | xori
+              3'd5: ALU_control = funct_7 ? 4'b0110 : 4'b0111; // srl | slri (funct7 = 0) or sra | srai (funct7 = 1)
+              3'd6: ALU_control = 4'b0011; // or | ori
+              3'd7: ALU_control = 4'b0010; // and | andi
+              default: ALU_control = 4'b0000; // undefined
+          endcase
+      end
+  endtask
 
-  //Main decoder
-  always_comb begin
-    RegWrite  = 1'b0;
-    MemWrite  = 1'b0;
-    ALUSrc    = 1'b0;
-    ResultSrc = 1'b0;
-    Branch    = 1'b0;
-    ImmSrc    = 2'b00;
-    ALUOp     = 2'b00;
+  always_comb begin // defaults 
+    RegWrite = 1'b0; ImmSrc = 3'b000; MemWrite = 1'b0; ResultSrc = 2'b00; PCSrc = 2'b00; ALUSrc = 1'b0; ALUControl = 4'b0000; AddrMode = 1'b0;
 
     case (op)
-      OPC_LW: begin
-        RegWrite  = 1'b1;
-        MemWrite  = 1'b0;
-        ALUSrc    = 1'b1;      // use immediate offset
-        ResultSrc = 1'b1;      // write back from data memory
-        Branch    = 1'b0;
-        ImmSrc    = 2'b00;     // I-type 
-        ALUOp     = 2'b00;     // add for address calc
-      end
+        // R-type
+        7'b0110011: begin 
+            RegWrite = 1'b1; ALUSrc = 1'b0; MemWrite = 1'b0; ResultSrc = 2'b00; PCSrc = 2'b0;
+            get_ALU_control(op, funct3, funct7, ALUControl);
+        end
 
-      OPC_SW: begin
-        RegWrite  = 1'b0;
-        MemWrite  = 1'b1;
-        ALUSrc    = 1'b1;
-        ResultSrc = 1'b0;      // x
-        Branch    = 1'b0;
-        ImmSrc    = 2'b01;     // S-type 
-        ALUOp     = 2'b00;    
-      end
+        // I-type (ALU instructions)
+        7'b0010011: begin 
+            RegWrite = 1'b1; ImmSrc = 3'b000; MemWrite = 1'b0; ResultSrc = 2'b00; ALUSrc = 1'b1; PCSrc = 2'b0; 
+            get_ALU_control(op, funct3, funct7, ALUControl);
+        end
 
-      OPC_R: begin
-        RegWrite  = 1'b1;
-        MemWrite  = 1'b0;
-        ALUSrc    = 1'b0;      // use RD2 as B input
-        ResultSrc = 1'b0;      // write back ALU result
-        Branch    = 1'b0;
-        ImmSrc    = 2'b00;     // x
-        ALUOp     = 2'b10;     // decode by funct3/funct7
-      end
+        // I-type (loading)
+        7'b0000011: begin
+            RegWrite = 1'b1; ImmSrc = 3'b000; MemWrite = 1'b0; ALUSrc = 1'b1; ALUControl = 4'b0000; ResultSrc = 2'b01; PCSrc = 2'b0;
+            case (funct3)
+                3'b010: AddrMode = 1'b0;     // LW
+                3'b100: AddrMode = 1'b1;     // LBU
+                default: AddrMode = 1'b0;
+            endcase
+        end
 
-      OPC_BEQ: begin
-        RegWrite  = 1'b0;
-        MemWrite  = 1'b0;
-        ALUSrc    = 1'b0;      // compare RD1 and RD2
-        ResultSrc = 1'b0;      // x
-        Branch    = 1'b1;
-        ImmSrc    = 2'b10;     // B-type 
-        ALUOp     = 2'b01;     // subtract for comparison
-      end
+        // I-type (jalr)
+        7'b1100111: begin
+            RegWrite = 1'b1; MemWrite = 1'b0; ImmSrc = 3'b000; ResultSrc = 2'100; PCSrc = 2'b10; ALUControl = 4'b0000; ALUSrc = 1;
+        end
 
-      default: begin
-      end
+        // S-type
+        7'b0100011: begin 
+            RegWrite = 1'b0; ImmSrc = 3'b001; ALUSrc = 1'b1; ALUControl = 4'b0000; MemWrite = 1'b1; PCSrc = 2'b0;
+            case (funct3)
+                3'b000: AddrMode = 1'b1;    // SB
+                3'b010: AddrMode = 1'b0;    // SW
+                default: AddrMode = 1'b0;
+            endcase
+        end
+
+        // B-type
+        7'b1100011: begin 
+            RegWrite = 1'b0; ImmSrc = 3'b010; ALUSrc = 1'b0; ALUControl = 4'b0001; MemWrite = 1'b0;
+            case (funct3)
+                3'b000: PCSrc = zero ? 2'b01 : 2'b0;       // beq
+                3'b001: PCSrc = ~zero ? 2'b01 : 2'b0;      // bne
+                3'b100: PCSrc = negative ? 2'b01 : 2'b0;   // blt 
+                3'b101: PCSrc = ~negative ? 2'b01 : 2'b0;  // bge
+                3'b110: PCSrc = negative ? 2'b01 : 2'b0;   // bltu
+                3'b111: PCSrc = ~negative ? 2'b01 : 2'b0;  // bgeu
+                default: PCSrc = 2'b0; // Default case
+            endcase
+        end
+
+        // U-type (lui)
+        7'b0110111: begin 
+            RegWrite = 1'b1; ImmSrc = 3'b011; MemWrite = 1'b0; ResultSrc = 2'b11; PCSrc = 2'b0;
+        end
+
+        // J-type (jal)
+        7'b1101111: begin 
+            RegWrite = 1'b1; ImmSrc = 3'b100; MemWrite = 1'b0; ResultSrc = 2'b10; PCSrc = 2'b01;
+        end
+
+        default: begin
+            // Set initially
+        end
     endcase
   end
+  end
 
-    //Alu Decoder
-  always_comb begin
-  unique case (ALUOp)
-    2'b00: ALUControl = 3'b000;                       // lw, sw 
-    2'b01: ALUControl = 3'b001;                       // beq 
-    2'b10: begin                                      // R-type 
-      unique case (funct3)
-        3'b000: begin
-          ALUControl = ((op[5] & funct7_5) ? 3'b001 : 3'b000); // 11 => sub, else add
-        end
-        3'b010: ALUControl = 3'b101;                  // slt
-        3'b110: ALUControl = 3'b011;                  // or
-        3'b111: ALUControl = 3'b010;                  // and
-        default: ALUControl = 3'b000; 
-      endcase
-    end
-    default: ALUControl = 3'b000;
-  endcase
-end
-
-  assign PCSrc = Branch & Zero; 
 endmodule

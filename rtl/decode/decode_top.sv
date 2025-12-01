@@ -12,7 +12,22 @@ module decode_top(
     output logic PCSrc, 
     output logic AddrMode,
     output logic [WIDTH-1:0] ImmExt,
-    
-    
-
+);
+(
+)
+module ImmExt(
+  .instr(instr),
+  .Imm ()
+)
+module control(
+  .ImmSrc()
+)
+module regfile(
+  .clk(clk),
+  .WD3(Result),
+  .A1(instr[19:15]),
+  .A2(instr[24:20]),
+  .A3(instr[11:7]),
+  .RD1(),
+  .RD2(),
 )

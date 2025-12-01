@@ -15,10 +15,10 @@ Schematic
 | **instr_mem**                |   X    |        |      |      |
 | **pc_register**              |   *    |   *     |  X    |     |
 | **datamem**                  |   X    |       |      |      |
-| **control**                  |        |   X    |      |      |
+| **control**                  |   X    |       |      |      |
 | **reg_file**                 |        |   X     |     |      |
 | **signextend**               |   X    |        |      |      |
-| **top (system integration)** |        |        |      |      |
+| **top (system integration)** |   *     |   *     |      |      |
 | **F1 Assembly.s**            |        |        |      |      |
 | **System Testing & Debugging** |     |        |      |      |
 | **PDF testing**              |        |        |      |      |
