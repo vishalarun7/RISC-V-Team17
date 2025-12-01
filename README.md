@@ -11,15 +11,15 @@ Schematic
 
 | Module                       | Vishal | Nikhil | Emir | Raph |
 |------------------------------|:------:|:------:|:----:|:----:|
-| **alu**                      |        |  X     |     |      |
-| **instr_mem**                |   X    |        |      |      |
-| **pc_register**              |   *    |   *     |  X    |     |
-| **datamem**                  |   X    |       |      |      |
-| **control**                  |   X    |       |      |      |
-| **reg_file**                 |        |   X     |     |      |
-| **signextend**               |   X    |        |      |      |
-| **top (system integration)** |        |   X     |      |      |
-| **F1 Assembly.s**            |        |        |      |      |
+| **alu**                      |        |  X     |     |      *|
+| **instr_mem**                |   X    |        |      |    *  |
+| **pc_register**              |   *    |   *     |  X    |  *   |
+| **datamem**                  |   X    |       |      |    *  |
+| **control**                  |   X    |       |      |    *  |
+| **reg_file**                 |        |   X     |     |   *   |
+| **signextend**               |   X    |        |      |     * |
+| **top (system integration)** |        |   X     |      |   *   |
+| **F1 Assembly.s**            |        |        |      |   X   |
 | **System Testing & Debugging** |     |        |      |   X   |
 | **PDF testing**              |        |        |      |  X   |
 | **F1 Testing**               |        |        |      |   X  |
