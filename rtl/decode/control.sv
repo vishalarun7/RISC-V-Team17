@@ -40,7 +40,7 @@ module control(
   endtask
 
   always_comb begin // defaults 
-    RegWrite = 1'b0; ImmSrc = 3'b000; MemWrite = 1'b0; ResultSrc = 2'b00; PCSrc = 2'b00; ALUSrc = 1'b0; ALUControl = 4'b0000; AddrMode = 1'b0;
+    default RegWrite = 1'b0; ImmSrc = 3'b000; MemWrite = 1'b0; ResultSrc = 2'b00; PCSrc = 2'b00; ALUSrc = 1'b0; ALUControl = 4'b0000; AddrMode = 1'b0;
 
     case (op)
         // R-type
@@ -102,10 +102,6 @@ module control(
         // J-type (jal)
         7'b1101111: begin 
             RegWrite = 1'b1; ImmSrc = 3'b100; MemWrite = 1'b0; ResultSrc = 2'b10; PCSrc = 2'b01;
-        end
-
-        default: begin
-            // Set initially
         end
     endcase
   end
