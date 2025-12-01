@@ -1,4 +1,4 @@
-module reg_file #(
+module regfile #(
     parameter ADDRESS_WIDTH = 32
 )(
     input logic clk,

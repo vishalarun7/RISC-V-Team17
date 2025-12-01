@@ -1,0 +1,15 @@
+# Test output directory
+test_out/
+
+# Build/compile scripts
+doit.sh
+compile
+
+# VCD waveform files
+*.vcd
+
+# Object files and build artifacts
+*.o
+*.a
+*.d
+obj_dir/
