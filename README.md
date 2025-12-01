@@ -20,9 +20,9 @@ Schematic
 | **signextend**               |   X    |        |      |      |
 | **top (system integration)** |        |   X     |      |      |
 | **F1 Assembly.s**            |        |        |      |      |
-| **System Testing & Debugging** |     |        |      |      |
-| **PDF testing**              |        |        |      |      |
-| **F1 Testing**               |        |        |      |      |
+| **System Testing & Debugging** |     |        |      |   X   |
+| **PDF testing**              |        |        |      |  X   |
+| **F1 Testing**               |        |        |      |   X  |
 
 **X = Lead Contributor**  
 **\* = Partial Contributor**
