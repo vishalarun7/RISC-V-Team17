@@ -18,7 +18,7 @@ Schematic
 | **control**                  |   X    |       |      |      |
 | **reg_file**                 |        |   X     |     |      |
 | **signextend**               |   X    |        |      |      |
-| **top (system integration)** |   *     |   X     |      |      |
+| **top (system integration)** |        |   X     |      |      |
 | **F1 Assembly.s**            |        |        |      |      |
 | **System Testing & Debugging** |     |        |      |      |
 | **PDF testing**              |        |        |      |      |
