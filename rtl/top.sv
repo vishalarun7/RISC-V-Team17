@@ -8,128 +8,122 @@ module top #(
     output logic [DATA_WIDTH-1:0] a0
 );
 
-    // regs and int sigs
-    logic [DATA_WIDTH-1:0] PC, PCNext, PCPlus4, PCTarget;
-    logic [DATA_WIDTH-1:0] Instr;
-    logic [DATA_WIDTH-1:0] SrcA, SrcB, WriteData;
-    logic [DATA_WIDTH-1:0] ALUResult;
-    logic [DATA_WIDTH-1:0] ReadData;
+    // fetch signals
+    logic [1:0] PCSrc;
     logic [DATA_WIDTH-1:0] Result;
     logic [DATA_WIDTH-1:0] ImmExt;
-    logic [DATA_WIDTH-1:0] RD1, RD2;
-    
 
-    // ctrl sigs
-    logic RegWrite, MemWrite, ALUSrc;
+    logic [ADDR_WIDTH-1:0] instr;
+
+
+    // control signals
+    logic Zero;
+    logic Negative;
+
+    logic RegWrite;
+    logic MemWrite;
+    logic ALUSrc;
     logic [1:0] ResultSrc;
-    logic Zero, Negative;
-    logic [1:0] PCSrc;
+    logic Branch;
+    logic Jump;
     logic [2:0] ImmSrc;
     logic [3:0] ALUControl;
     logic AddrMode;
-    
 
-    always_ff @(posedge clk or posedge rst) begin
-        if (rst)
-            PC <= 32'h00000000;
-        else
-            PC <= PCNext;
-    end
-    
+    // regfile signals
+    logic [DATA_WIDTH-1:0] WD3;
+    logic [DATA_WIDTH-1:0] RD1;
+    logic [DATA_WIDTH-1:0] RD2;
+    logic [ADDR_WIDTH-1:0] a0_regfile;
 
-    assign PCPlus4 = PC + 32'd4;
+    // alu signals
+    logic [DATA_WIDTH-1:0] ALUResult;
 
-    assign PCTarget = PC + ImmExt;
-    
+    // data memory signals
+    logic [DATA_WIDTH-1:0] ReadData;
 
-    always_comb begin
-        case (PCSrc)
-            2'b00: PCNext = PCPlus4;
-            2'b01: PCNext = PCTarget;
-            2'b10: PCNext = ALUResult;
-            2'b11: PCNext = PC;
-            default: PCNext = PCPlus4;
-        endcase
-    end
-
-    instr_mem #(
-        .ADDRESS_WIDTH(DATA_WIDTH)
-    ) INSTR_MEM (
-        .addr(PC),
-        .instr(Instr)
-    );
-    control CONTROL (
-        .op(Instr[6:0]),
-        .funct3(Instr[14:12]),
-        .funct7(Instr[30]),
-        .Zero(Zero),
-        .Negative(Negative),
-        .RegWrite(RegWrite),
-        .MemWrite(MemWrite),
-        .ALUSrc(ALUSrc),
-        .ResultSrc(ResultSrc),
-        .Branch(),
-        .Jump(),
-        .ImmSrc(ImmSrc),
-        .PCSrc(PCSrc),
-        .ALUControl(ALUControl),
-        .AddrMode(AddrMode)
-    );
-    
-    regfile #(
-        .ADDRESS_WIDTH(DATA_WIDTH)
-    ) REG_FILE (
+    fetch_top #(
+        .DATA_WIDTH(DATA_WIDTH),
+        .ADDRESS_WIDTH(ADDR_WIDTH)
+    ) fetch_inst (
         .clk(clk),
-        .AD1(Instr[19:15]),
-        .AD2(Instr[24:20]), 
-        .AD3(Instr[11:7]),
-        .WE3(RegWrite),
-        .WD3(Result),
-        .RD1(RD1),
-        .RD2(RD2),
-        .a0(a0)
+        .rst(rst),
+        .PCSrc(PCSrc),
+        .Result(Result),
+        .ImmExt(ImmExt),
+        .instr(instr)
     );
-    immext IMM_EXT (
-        .instr(Instr),
-        .ImmSrc(ImmSrc),
-        .ImmExt(ImmExt)
-    );
-    
 
-    assign SrcA = RD1;
-   
-    assign SrcB = ALUSrc ? ImmExt : RD2; // alu reads from rd2 or imm based on alusrc signal    
+    control control_inst (
+        .op (instr[6:0]),
+        .funct3 (instr[14:12]),
+        .funct7 (instr[30]),
+        .Zero (Zero),
+        .Negative (Negative),
+        .RegWrite (RegWrite),
+        .MemWrite (MemWrite),
+        .ALUSrc (ALUSrc),
+        .ResultSrc (ResultSrc),
+        .PCSrc (PCSrc),
+        .Branch (Branch),
+        .Jump (Jump),
+        .ImmSrc (ImmSrc),
+        .ALUControl (ALUControl),
+        .AddrMode (AddrMode)
+    );
+
+    regfile regfile_inst (
+        .clk (clk),
+        .AD1(instr[19:15]),
+        .AD2(instr[24:20]),
+        .AD3(instr[11:7]),
+        .WE3 (RegWrite),
+        .WD3 (WD3),
+        .RD1 (RD1),
+        .RD2 (RD2),
+        .a0 (a0_regfile)
+    );
+
+    immext immext_inst (
+        .instr (instr),
+        .ImmSrc (ImmSrc),
+        .ImmExt (ImmExt)
+    );
 
     alu #(
         .DATA_WIDTH(DATA_WIDTH)
-    ) ALU (
-        .SrcA(SrcA),
-        .SrcB(SrcB),
-        .ALUControl(ALUControl),
-        .ALUResult(ALUResult),
-        .Zero(Zero),
-        .Negative(Negative)
+    ) alu_inst (
+        .SrcA (RD1),
+        .SrcB (ALUSrc ? ImmExt : RD2),
+        .ALUControl (ALUControl),
+        .ALUResult (ALUResult),
+        .Zero (Zero),
+        .Negative (Negative)
     );
     
     datamem #(
         .WIDTH(DATA_WIDTH)
-    ) DATA_MEM (
-        .aluresult(ALUResult),
-        .RD2(RD2),
-        .clk(clk),
-        .MemWrite(MemWrite),
-        .AddrMode(AddrMode),
-        .RD(ReadData)
+    ) datamem_inst (
+        .clk (clk),
+        .aluresult (ALUResult),
+        .RD2 (RD2),
+        .MemWrite (MemWrite),
+        .AddrMode (AddrMode),
+        .RD (ReadData)
     );
-    
+
+    // Result multiplexer (selects between ALU result, memory read data, etc.)
     always_comb begin
         case (ResultSrc)
-            2'b00: Result = ALUResult;   // ALU result
-            2'b01: Result = ReadData;    // Memory read
-            2'b10: Result = PCPlus4;     // JAL/JALR (return address)
-            2'b11: Result = ImmExt;      // LUI immediate
+            2'b00: Result = ALUResult;      // ALU result
+            2'b01: Result = ReadData;       // Memory read data
+            2'b10: Result = ImmExt;         // Immediate (for LUI-like instructions)
             default: Result = ALUResult;
         endcase
     end
+
+    // Write data multiplexer for register file
+    assign WD3 = Result;
+    assign a0 = a0_regfile;
 
 endmodule

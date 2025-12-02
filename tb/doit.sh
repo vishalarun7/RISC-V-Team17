@@ -11,6 +11,10 @@ GREEN=$(tput setaf 2)
 RED=$(tput setaf 1)
 RESET=$(tput sgr0)
 
+# Google Test paths (Homebrew)
+GTEST_INCLUDE="/opt/homebrew/include"
+GTEST_LIB="/opt/homebrew/lib"
+
 # Variables
 passes=0
 fails=0
@@ -43,9 +47,14 @@ for file in "${files[@]}"; do
                 -cc ${RTL_FOLDER}/${name}.sv \
                 --exe ${file} \
                 -y ${RTL_FOLDER} \
+                -y ${RTL_FOLDER}/fetch \
+                -y ${RTL_FOLDER}/decode \
+                -y ${RTL_FOLDER}/execute \
+                -y ${RTL_FOLDER}/memory \
                 --prefix "Vdut" \
                 -o Vdut \
-                -LDFLAGS "-lgtest -lgtest_main -lpthread"
+                -CFLAGS "-std=c++17 -I${GTEST_INCLUDE}" \
+                -LDFLAGS "-L${GTEST_LIB} -lgtest -lgtest_main -lpthread"
 
     # Build C++ project with automatically generated Makefile
     make -j -C obj_dir/ -f Vdut.mk
