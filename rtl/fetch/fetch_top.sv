@@ -5,13 +5,13 @@ module fetch_top #(
     input logic clk, 
     input logic rst, 
     input logic [1:0] PCSrc, 
-    input logic [DATA_WIDTH-1:0] Result,
+    input logic [DATA_WIDTH-1:0] ALUResult,
     input logic [DATA_WIDTH-1:0] ImmExt,
-    output logic [ADDRESS_WIDTH-1:0] instr
+    output logic [ADDRESS_WIDTH-1:0] instr,
+    output logic [DATA_WIDTH-1:0] PCPlus4
 );
 
     logic [DATA_WIDTH-1:0] PC;
-    logic [DATA_WIDTH-1:0] PCPlus4;
     logic [DATA_WIDTH-1:0] PCTarget;
     logic [DATA_WIDTH-1:0] PCNext;
 
@@ -37,7 +37,7 @@ module fetch_top #(
     mux4 PCMux(
         .in0 (PCPlus4),
         .in1 (PCTarget),
-        .in2 (Result),
+        .in2 (ALUResult),
         .in3 (PC),
         .sel (PCSrc),
         .out (PCNext)

@@ -106,12 +106,12 @@ module control(
 
         // U-type (lui)
         7'b0110111: begin 
-            RegWrite = 1'b1; ImmSrc = 3'b011; MemWrite = 1'b0; ResultSrc = 2'b11; PCSrc = 2'b00;
+            RegWrite = 1'b1; ImmSrc = 3'b100; MemWrite = 1'b0; ResultSrc = 2'b11; PCSrc = 2'b00;
         end
 
         // J-type (jal)
         7'b1101111: begin 
-            RegWrite = 1'b1; ImmSrc = 3'b100; MemWrite = 1'b0; ResultSrc = 2'b10; PCSrc = 2'b01;
+            RegWrite = 1'b1; ImmSrc = 3'b011; MemWrite = 1'b0; ResultSrc = 2'b10; PCSrc = 2'b01;
         end
     endcase
   end

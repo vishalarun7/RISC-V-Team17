@@ -12,9 +12,9 @@ module top #(
     logic [1:0] PCSrc;
     logic [DATA_WIDTH-1:0] Result;
     logic [DATA_WIDTH-1:0] ImmExt;
+    logic [DATA_WIDTH-1:0] PCPlus4;
 
     logic [ADDR_WIDTH-1:0] instr;
-
 
     // control signals
     logic Zero;
@@ -49,9 +49,10 @@ module top #(
         .clk(clk),
         .rst(rst),
         .PCSrc(PCSrc),
-        .Result(Result),
+        .ALUResult(ALUResult),
         .ImmExt(ImmExt),
-        .instr(instr)
+        .instr(instr),
+        .PCPlus4(PCPlus4)
     );
 
     control control_inst (
@@ -117,7 +118,8 @@ module top #(
         case (ResultSrc)
             2'b00: Result = ALUResult;      // ALU result
             2'b01: Result = ReadData;       // Memory read data
-            2'b10: Result = ImmExt;         // Immediate (for LUI-like instructions)
+            2'b10: Result = PCPlus4;        // PC+4 (for JAL/JALR)
+            2'b11: Result = ImmExt;         // Immediate (for LUI)
             default: Result = ALUResult;
         endcase
     end
