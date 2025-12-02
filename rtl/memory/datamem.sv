@@ -9,38 +9,41 @@ module datamem #(
     output logic [WIDTH-1:0] RD
 );
 
-    logic [WIDTH-1:0] ram_array [32'h00001000:32'h0001FFFF];
-    logic [WIDTH-3:0] word_index;
-    logic [1:0] byte_offset;
+    logic [7:0] ram_array [32'h0001FFFF:0];
+    logic [WIDTH-1:0] word_address;
 
-    assign word_index  = aluresult[31:2]; //discard bottom two bits for word index
-    assign byte_offset = aluresult[1:0]; 
+    //init data memory from data.hex file
+    initial begin
+        $readmemh("data.hex", ram_array, 32'h00010000);
+    end
+
+    assign word_address = {aluresult[31:2], 2'b00}; //word-aligned address
 
     always_ff @(posedge clk) begin
         if (MemWrite) begin
             if (AddrMode == 1'b0) begin 
-                ram_array[word_index] <= RD2; //sw
+                // sw - write 4 bytes (little-endian)
+                ram_array[word_address]     <= RD2[7:0];
+                ram_array[word_address + 1] <= RD2[15:8];
+                ram_array[word_address + 2] <= RD2[23:16];
+                ram_array[word_address + 3] <= RD2[31:24];
             end else begin
-                case (byte_offset) //sb
-                    2'b00: ram_array[word_index][7:0]   <= RD2[7:0];
-                    2'b01: ram_array[word_index][15:8]  <= RD2[7:0];
-                    2'b10: ram_array[word_index][23:16] <= RD2[7:0];
-                    2'b11: ram_array[word_index][31:24] <= RD2[7:0];
-                endcase
+                // sb - write 1 byte at exact address
+                ram_array[aluresult] <= RD2[7:0];
             end
         end
     end
 
     always_comb begin
         if (AddrMode == 1'b0) begin
-            RD = ram_array[word_index]; //lw
+            // lw - read 4 bytes (little-endian)
+            RD = {ram_array[word_address + 3], 
+                  ram_array[word_address + 2], 
+                  ram_array[word_address + 1], 
+                  ram_array[word_address]};
         end else begin
-            case (byte_offset) //lbu
-                2'b00: RD = {24'h0, ram_array[word_index][7:0]};
-                2'b01: RD = {24'h0, ram_array[word_index][15:8]};
-                2'b10: RD = {24'h0, ram_array[word_index][23:16]};
-                2'b11: RD = {24'h0, ram_array[word_index][31:24]};
-            endcase
+            // lbu - read 1 byte at exact address
+            RD = {24'h0, ram_array[aluresult]};
         end
     end
 
