@@ -7,6 +7,9 @@ module fetch_top #(
     input logic [1:0] PCSrc, 
     input logic [DATA_WIDTH-1:0] ALUResult,
     input logic [DATA_WIDTH-1:0] ImmExt,
+    input logic stall; 
+    input logic flush;
+    
     output logic [ADDRESS_WIDTH-1:0] instr,
     output logic [DATA_WIDTH-1:0] PCPlus4
 );

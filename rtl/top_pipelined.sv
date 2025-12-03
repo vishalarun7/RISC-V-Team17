@@ -2,45 +2,71 @@ module top #(
     parameter DATA_WIDTH = 32,
               ADDR_WIDTH = 32
 ) (
-    input logic clk,
-    input logic rst,
-    input logic trigger,
+    input  logic clk,
+    input  logic rst,
+    input  logic trigger,
     output logic [DATA_WIDTH-1:0] a0
 );
 
-    // fetch signals
-    logic [1:0] PCSrc;
-    logic [DATA_WIDTH-1:0] Result;
-    logic [DATA_WIDTH-1:0] ImmExt;
+            //IF signals 
+    logic [1:0]  PCSrcE;                      
+    logic [DATA_WIDTH-1:0] PCTargetE;         
+    logic [DATA_WIDTH-1:0] PCPlus4F;          
+    logic [ADDR_WIDTH-1:0] instrF;
 
-    logic [ADDR_WIDTH-1:0] instr;
+             //Stall/flush controls 
+    logic stallF, stallD, flushD, flushE;
 
+            //IF/ID pipeline regs 
+    logic [DATA_WIDTH-1:0] PCPlus4D;
+    logic [ADDR_WIDTH-1:0] instrD;
 
-    // control signals
-    logic Zero;
-    logic Negative;
+            //ID signals 
+    logic RegWriteD, MemWriteD, AddrModeD, ALUSrcD, MemReadD;
+    logic [1:0] ResultSrcD;
+    logic BranchD, JumpD;
+    logic [2:0] ImmSrcD;
+    logic [3:0] ALUControlD;
 
-    logic RegWrite;
-    logic MemWrite;
-    logic ALUSrc;
-    logic [1:0] ResultSrc;
-    logic Branch;
-    logic Jump;
-    logic [2:0] ImmSrc;
-    logic [3:0] ALUControl;
-    logic AddrMode;
+    logic [DATA_WIDTH-1:0] ImmExtD;
+    logic [DATA_WIDTH-1:0] RD1D, RD2D;
+    logic [4:0] rs1D, rs2D, rdD;
 
-    // regfile signals
-    logic [DATA_WIDTH-1:0] WD3;
-    logic [DATA_WIDTH-1:0] RD1;
-    logic [DATA_WIDTH-1:0] RD2;
-    logic [ADDR_WIDTH-1:0] a0_regfile;
+            //ID/EX pipeline regs 
+    logic RegWriteE, MemWriteE, AddrModeE, ALUSrcE, MemReadE;
+    logic [1:0] ResultSrcE;
+    logic BranchE, JumpE;
+    logic [3:0] ALUControlE;
+    logic [DATA_WIDTH-1:0] ImmExtE, RD1E, RD2E, PCPlus4E;
+    logic [4:0] rs1E, rs2E, rdE;
 
-    // alu signals
-    logic [DATA_WIDTH-1:0] ALUResult;
+            //EX signals 
+    logic [DATA_WIDTH-1:0] SrcAE, SrcBE, ALUResultE;
+    logic ZeroE, NegativeE;
 
-    // data memory signals
-    logic [DATA_WIDTH-1:0] ReadData;
+            //EX/MEM pipeline regs 
+    logic RegWriteM, MemWriteM, MemReadM, AddrModeM;
+    logic [1:0] ResultSrcM;
+    logic [DATA_WIDTH-1:0] ALUResultM, WriteDataM, PCPlus4M;
+    logic [4:0] rdM;
+
+            //MEM signals 
+    logic [DATA_WIDTH-1:0] ReadDataM;
+
+            //MEM/WB pipeline regs 
+    logic RegWriteW;
+    logic [1:0] ResultSrcW;
+    logic [DATA_WIDTH-1:0] ALUResultW, ReadDataW, PCPlus4W, ImmExtW;
+    logic [4:0] rdW;
+
+            //WB signals 
+    logic [DATA_WIDTH-1:0] ResultW;
+    logic [DATA_WIDTH-1:0] a0_regfile;
+
+            //Forwarding controls 
+    // 00: no forward, 10: from EX/MEM, 01: from MEM/WB
+    logic [1:0] forwardAE, forwardBE;
+
 
     fetch_top #(
         .DATA_WIDTH(DATA_WIDTH),
@@ -49,9 +75,10 @@ module top #(
         .clk(clk),
         .rst(rst),
         .PCSrc(PCSrc),
-        .Result(Result),
+        .ALUResult(ALUResult),
         .ImmExt(ImmExt),
-        .instr(instr)
+        .instr(instr),
+        .PCPlus4(PCPlus4)
     );
 
     control control_inst (
@@ -117,7 +144,8 @@ module top #(
         case (ResultSrc)
             2'b00: Result = ALUResult;      // ALU result
             2'b01: Result = ReadData;       // Memory read data
-            2'b10: Result = ImmExt;         // Immediate (for LUI-like instructions)
+            2'b10: Result = PCPlus4;        // PC+4 (for JAL/JALR)
+            2'b11: Result = ImmExt;         // Immediate (for LUI)
             default: Result = ALUResult;
         endcase
     end

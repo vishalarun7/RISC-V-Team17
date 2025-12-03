@@ -17,7 +17,7 @@ module regfile #(
     assign RD1 = (AD1 == 0) ? 0 : register[AD1];
     assign RD2 = (AD2 == 0) ? 0 : register[AD2];
 
-    always_ff @(posedge clk) begin
+    always_ff @(negedge clk) begin //adjusted to write on negative edge of clock
         if (WE3 && AD3 != 5'd0) begin
             register[AD3] <= WD3;
         end

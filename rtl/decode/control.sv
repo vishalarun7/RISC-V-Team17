@@ -15,6 +15,7 @@ module control(
   output logic [1:0]  PCSrc,     //pc mux sel line; 0 = pc+4 ; 1 = pc+imm (branch,jal); 2 = aluresult (jalr) ; 3 = pc (stall)
   output logic [3:0]  ALUControl,//controls the operation to be performed in ALU
   output logic        AddrMode   //byte (0) and word (1) addressing 
+  
 );
 
   task ALU_control(
