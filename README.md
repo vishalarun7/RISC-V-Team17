@@ -18,7 +18,7 @@ Schematic
 |                | **Control Unit**                |   X    |        |      |      |
 |                | **Register File**               |        |   X    |      |      |
 |                | **Sign Extend**                 |   X    |        |      |      |
-|                | **Top (System Integration)**    |        |   X    |      |   *  |
+|                | **Top (System Integration)**    |        |    *   |      |   X  |
 | **Pipeline**   | **Fetch–Decode Pipeline**       |   X     |        |      |      |
 |                | **Decode–Execute Pipeline**     |    X    |        |      |      |
 |                | **Execute–Memory Pipeline**     |     X   |        |      |      |
@@ -31,7 +31,7 @@ Schematic
 |                | **PDF Testing**                 |        |        |      | X    |
 |                | **System Testing & Debugging**  |        |        |      | X    |
 |                | **F1 Assembly.s**               |        |        |      | X    |
-| **Other**      | **Vbuddy**                      |        |        |      |      |
+| **Other**      | **Vbuddy**                      |        |        |      | X    |
 
 
 **X = Lead Contributor**  
