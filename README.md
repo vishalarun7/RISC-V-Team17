@@ -9,20 +9,30 @@ Schematic
 
 ## Contributions
 
-| Module                       | Vishal | Nikhil | Emir | Raph |
-|------------------------------|:------:|:------:|:----:|:----:|
-| **alu**                      |        |  X     |     |      *|
-| **instr_mem**                |   X    |        |      |      |
-| **pc_register**              |   *    |   *     |  X    |     |
-| **datamem**                  |   X    |       |      |      |
-| **control**                  |   X    |       |      |      |
-| **reg_file**                 |        |   X     |     |      |
-| **signextend**               |   X    |        |      |      |
-| **top (system integration)** |        |   X     |      |   *   |
-| **F1 Assembly.s**            |        |        |      |   X   |
-| **System Testing & Debugging** |     |        |      |   X   |
-| **PDF testing**              |        |        |      |  X   |
-| **F1 Testing**               |        |        |      |   X  |
+| Category       | Module                         | Vishal | Nikhil | Emir | Raph |
+|----------------|---------------------------------|:------:|:------:|:----:|:----:|
+| **Single Cycle** | **ALU**                        |        | X      |      |      |
+|                | **PC Register**                 |   *    |   *    |  X   |      |
+|                | **Instruction Memory**          |   X    |        |      |      |
+|                | **Data Memory**                 |   X    |        |      |      |
+|                | **Control Unit**                |   X    |        |      |      |
+|                | **Register File**               |        |   X    |      |      |
+|                | **Sign Extend**                 |   X    |        |      |      |
+|                | **Top (System Integration)**    |        |   X    |      |   *  |
+| **Pipeline**   | **Fetch–Decode Pipeline**       |   X     |        |      |      |
+|                | **Decode–Execute Pipeline**     |    X    |        |      |      |
+|                | **Execute–Memory Pipeline**     |     X   |        |      |      |
+|                | **Memory–Writeback Pipeline**   |     X   |        |      |      |
+|                | **Hazard Unit**                 |        |        |      |      |
+| **Cache**      | **Memory (Refactor)**           |        |        |      |      |
+|                | **Direct-Mapped Cache**         |        |        |      |      |
+|                | **Two-Way Set Associative Cache** |      |        |      |      |
+| **Verification** | **F1 Testing**                |        |        |      | X    |
+|                | **PDF Testing**                 |        |        |      | X    |
+|                | **System Testing & Debugging**  |        |        |      | X    |
+|                | **F1 Assembly.s**               |        |        |      | X    |
+| **Other**      | **Vbuddy**                      |        |        |      |      |
+
 
 **X = Lead Contributor**  
 **\* = Partial Contributor**
