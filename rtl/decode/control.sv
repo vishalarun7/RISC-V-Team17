@@ -1,20 +1,17 @@
 module control(
-  input  logic [6:0]  op,       // opcode
+  input  logic [6:0]  op,      
   input  logic [2:0]  funct3,
-  input  logic        funct7,   // bit [30],
-  input logic         Zero,     //flag for when two values are equal 
-  input logic         Negative, //flag for when a value is negative   
+  input  logic        funct7,   // bit [30] of instr
 
   output logic        RegWrite, //enable for regfile
   output logic        MemWrite, //enable for datamem
   output logic        ALUSrc,   //select for SrcB to ALU
-  output logic [1:0]  ResultSrc,//Result mux sel line; 00 = ALU result; 01 = Datamem; 10 = Pcplus4 (jal, jalr); 11 = Imm
+  output logic [1:0]  ResultSrc, //Result mux sel line; 00 = ALU result; 01 = Datamem; 10 = Pcplus4 (jal, jalr); 11 = Imm
   output logic        Branch,
   output logic        Jump, 
   output logic [2:0]  ImmSrc,     //Imm-type
-  output logic [1:0]  PCSrc,     //pc mux sel line; 0 = pc+4 ; 1 = pc+imm (branch,jal); 2 = aluresult (jalr) ; 3 = pc (stall)
-  output logic [3:0]  ALUControl,//controls the operation to be performed in ALU
-  output logic        AddrMode   //byte (0) and word (1) addressing 
+  output logic [3:0]  ALUControl, //controls the operation to be performed in ALU
+  output logic        AddrMode   //byte and word addressing 
   
 );
 
@@ -46,7 +43,6 @@ module control(
     ImmSrc = 3'b000; 
     MemWrite = 1'b0; 
     ResultSrc = 2'b00; 
-    PCSrc = 2'b00; 
     ALUSrc = 1'b0; 
     ALUControl = 4'b0000; 
     AddrMode = 1'b0;
@@ -56,19 +52,19 @@ module control(
     case (op)
         // R-type
         7'b0110011: begin 
-            RegWrite = 1'b1; ALUSrc = 1'b0; MemWrite = 1'b0; ResultSrc = 2'b00; PCSrc = 2'b00;
+            RegWrite = 1'b1; ALUSrc = 1'b0; MemWrite = 1'b0; ResultSrc = 2'b00;
             ALU_control(op, funct3, funct7, ALUControl);
         end
 
         // I-type (ALU instructions)
         7'b0010011: begin 
-            RegWrite = 1'b1; ImmSrc = 3'b000; MemWrite = 1'b0; ResultSrc = 2'b00; ALUSrc = 1'b1; PCSrc = 2'b00; 
+            RegWrite = 1'b1; ImmSrc = 3'b000; MemWrite = 1'b0; ResultSrc = 2'b00; ALUSrc = 1'b1;  
             ALU_control(op, funct3, funct7, ALUControl);
         end
 
         // I-type (loading)
         7'b0000011: begin
-            RegWrite = 1'b1; ImmSrc = 3'b000; MemWrite = 1'b0; ALUSrc = 1'b1; ALUControl = 4'b0000; ResultSrc = 2'b01; PCSrc = 2'b00;
+            RegWrite = 1'b1; ImmSrc = 3'b000; MemWrite = 1'b0; ALUSrc = 1'b1; ALUControl = 4'b0000; ResultSrc = 2'b01; 
             case (funct3)
                 3'b010: AddrMode = 1'b0;     // LW
                 3'b100: AddrMode = 1'b1;     // LBU
@@ -78,12 +74,12 @@ module control(
 
         // I-type (jalr)
         7'b1100111: begin
-            RegWrite = 1'b1; MemWrite = 1'b0; ImmSrc = 3'b000; ResultSrc = 2'b10; PCSrc = 2'b10; ALUControl = 4'b0000; ALUSrc = 1'b1;
+            RegWrite = 1'b1; MemWrite = 1'b0; ImmSrc = 3'b000; ResultSrc = 2'b10; ALUControl = 4'b0000; ALUSrc = 1'b1; Branch = 1'b0 ; Jump = 1'b1;
         end
 
         // S-type
         7'b0100011: begin 
-            RegWrite = 1'b0; ImmSrc = 3'b001; ALUSrc = 1'b1; ALUControl = 4'b0000; MemWrite = 1'b1; PCSrc = 2'b00;
+            RegWrite = 1'b0; ImmSrc = 3'b001; ALUSrc = 1'b1; ALUControl = 4'b0000; MemWrite = 1'b1; 
             case (funct3)
                 3'b000: AddrMode = 1'b1;    // SB
                 3'b010: AddrMode = 1'b0;    // SW
@@ -93,26 +89,17 @@ module control(
 
         // B-type
         7'b1100011: begin 
-            RegWrite = 1'b0; ImmSrc = 3'b010; ALUSrc = 1'b0; ALUControl = 4'b0001; MemWrite = 1'b0;
-            case (funct3)
-                3'b000: PCSrc = Zero ? 2'b01 : 2'b00;          // beq
-                3'b001: PCSrc = ~Zero ? 2'b01 : 2'b00;         // bne
-                3'b100: PCSrc = Negative ? 2'b01 : 2'b00;      // blt 
-                3'b101: PCSrc = ~Negative ? 2'b01 : 2'b00;     // bge
-                3'b110: PCSrc = Negative ? 2'b01 : 2'b00;      // bltu
-                3'b111: PCSrc = ~Negative ? 2'b01 : 2'b00;     // bgeu
-                default: PCSrc = 2'b00;
-            endcase
+            RegWrite = 1'b0; ImmSrc = 3'b010; ALUSrc = 1'b0; ALUControl = 4'b0001; MemWrite = 1'b0; Branch = 1'b1; Jump = 1'b0;
         end
 
         // U-type (lui)
         7'b0110111: begin 
-            RegWrite = 1'b1; ImmSrc = 3'b100; MemWrite = 1'b0; ResultSrc = 2'b11; PCSrc = 2'b00;
+            RegWrite = 1'b1; ImmSrc = 3'b100; MemWrite = 1'b0; ResultSrc = 2'b11; Jump = 1'b0; Branch = 1'b0; 
         end
 
         // J-type (jal)
         7'b1101111: begin 
-            RegWrite = 1'b1; ImmSrc = 3'b011; MemWrite = 1'b0; ResultSrc = 2'b10; PCSrc = 2'b01;
+            RegWrite = 1'b1; ImmSrc = 3'b011; MemWrite = 1'b0; ResultSrc = 2'b10; Jump = 1'b1; Branch = 1'b0;
         end
     endcase
   end

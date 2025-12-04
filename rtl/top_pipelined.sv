@@ -8,66 +8,6 @@ module top #(
     output logic [DATA_WIDTH-1:0] a0
 );
 
-            //IF signals 
-    logic [1:0]  PCSrcE;                      
-    logic [DATA_WIDTH-1:0] PCTargetE;         
-    logic [DATA_WIDTH-1:0] PCPlus4F;          
-    logic [ADDR_WIDTH-1:0] instrF;
-
-             //Stall/flush controls 
-    logic stallF, stallD, flushD, flushE;
-
-            //IF/ID pipeline regs 
-    logic [DATA_WIDTH-1:0] PCPlus4D;
-    logic [ADDR_WIDTH-1:0] instrD;
-
-            //ID signals 
-    logic RegWriteD, MemWriteD, AddrModeD, ALUSrcD, MemReadD;
-    logic [1:0] ResultSrcD;
-    logic BranchD, JumpD;
-    logic [2:0] ImmSrcD;
-    logic [3:0] ALUControlD;
-
-    logic [DATA_WIDTH-1:0] ImmExtD;
-    logic [DATA_WIDTH-1:0] RD1D, RD2D;
-    logic [4:0] rs1D, rs2D, rdD;
-
-            //ID/EX pipeline regs 
-    logic RegWriteE, MemWriteE, AddrModeE, ALUSrcE, MemReadE;
-    logic [1:0] ResultSrcE;
-    logic BranchE, JumpE;
-    logic [3:0] ALUControlE;
-    logic [DATA_WIDTH-1:0] ImmExtE, RD1E, RD2E, PCPlus4E;
-    logic [4:0] rs1E, rs2E, rdE;
-
-            //EX signals 
-    logic [DATA_WIDTH-1:0] SrcAE, SrcBE, ALUResultE;
-    logic ZeroE, NegativeE;
-
-            //EX/MEM pipeline regs 
-    logic RegWriteM, MemWriteM, MemReadM, AddrModeM;
-    logic [1:0] ResultSrcM;
-    logic [DATA_WIDTH-1:0] ALUResultM, WriteDataM, PCPlus4M;
-    logic [4:0] rdM;
-
-            //MEM signals 
-    logic [DATA_WIDTH-1:0] ReadDataM;
-
-            //MEM/WB pipeline regs 
-    logic RegWriteW;
-    logic [1:0] ResultSrcW;
-    logic [DATA_WIDTH-1:0] ALUResultW, ReadDataW, PCPlus4W, ImmExtW;
-    logic [4:0] rdW;
-
-            //WB signals 
-    logic [DATA_WIDTH-1:0] ResultW;
-    logic [DATA_WIDTH-1:0] a0_regfile;
-
-            //Forwarding controls 
-    // 00: no forward, 10: from EX/MEM, 01: from MEM/WB
-    logic [1:0] forwardAE, forwardBE;
-
-
     fetch_top #(
         .DATA_WIDTH(DATA_WIDTH),
         .ADDRESS_WIDTH(ADDR_WIDTH)
@@ -91,7 +31,6 @@ module top #(
         .MemWrite (MemWrite),
         .ALUSrc (ALUSrc),
         .ResultSrc (ResultSrc),
-        .PCSrc (PCSrc),
         .Branch (Branch),
         .Jump (Jump),
         .ImmSrc (ImmSrc),
