@@ -51,8 +51,12 @@ for file in "${files[@]}"; do
                 -y ${RTL_FOLDER}/decode \
                 -y ${RTL_FOLDER}/execute \
                 -y ${RTL_FOLDER}/memory \
+<<<<<<< HEAD
                 -y ${RTL_FOLDER}/general_purpose \
                 -y ${RTL_FOLDER}/pipelines \
+=======
+                -y ${RTL_FOLDER}/sv_components \
+>>>>>>> 4ba315b (fixed some syntax)
                 --prefix "Vdut" \
                 -o Vdut \
                 -CFLAGS "-std=c++17 -I${GTEST_INCLUDE}" \
