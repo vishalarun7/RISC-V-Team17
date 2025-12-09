@@ -1,18 +1,18 @@
 module fetch_decode#(
-    parameter DATA_WIDTH = 32;
+    parameter DATA_WIDTH = 32
 )(
     input logic         clk, 
     input logic         FlushD, 
     input logic         StallD,
 
-    input logic [DATA_WIDTH-1:0] PCPlus4F, instr;       
-    input logic [DATA_WIDTH-1:0] pcF; 
+    input logic [DATA_WIDTH-1:0] PCPlus4F, instr,       
+    input logic [DATA_WIDTH-1:0] pcF, 
 
-    output logic [DATA_WIDTH-1:0] PCPlus4D, instrD;
-    output logic [DATA_WIDTH-1:0] pcD;
+    output logic [DATA_WIDTH-1:0] PCPlus4D, instrD,
+    output logic [DATA_WIDTH-1:0] pcD
 );
 
-alwaysff(@posedge clk) begin 
+always_ff @(posedge clk) begin 
     if (!StallD) begin
         instrD <= instr;
         pcD <= pcF;

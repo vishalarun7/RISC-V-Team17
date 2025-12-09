@@ -51,6 +51,8 @@ for file in "${files[@]}"; do
                 -y ${RTL_FOLDER}/decode \
                 -y ${RTL_FOLDER}/execute \
                 -y ${RTL_FOLDER}/memory \
+                -y ${RTL_FOLDER}/general_purpose \
+                -y ${RTL_FOLDER}/pipelines \
                 --prefix "Vdut" \
                 -o Vdut \
                 -CFLAGS "-std=c++17 -I${GTEST_INCLUDE}" \

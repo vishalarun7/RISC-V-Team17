@@ -1,5 +1,5 @@
 module execute_memory#(
-    parameter DATA_WIDTH = 32;
+    parameter DATA_WIDTH = 32
 )(
     input logic clk,
 
@@ -11,6 +11,7 @@ module execute_memory#(
     input logic [DATA_WIDTH-1:0] PCPlus4E,
     input logic [DATA_WIDTH-1:0] ALUResultE,
     input logic [DATA_WIDTH-1:0] WriteDataE,
+    input logic AddrModeE,
 
     output logic RegWriteM,
     output logic MemWriteM, 
@@ -19,7 +20,8 @@ module execute_memory#(
     output logic [4:0] RdM,
     output logic [DATA_WIDTH-1:0] ALUResultM,
     output logic [DATA_WIDTH-1:0] WriteDataM,
-    output logic [DATA_WIDTH-1:0] PCPlus4M
+    output logic [DATA_WIDTH-1:0] PCPlus4M,
+    output logic AddrModeM
 );
     
 always_ff @(posedge clk) begin
@@ -30,7 +32,8 @@ always_ff @(posedge clk) begin
         MemReadM <= MemReadE;                
         RdM <= RdE;
         RegWriteM <= RegWriteE;
-        ResultSrcM <= ResultSrcE;                 
+        ResultSrcM <= ResultSrcE;
+        AddrModeM <= AddrModeE;
     end
  
 endmodule
