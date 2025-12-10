@@ -24,9 +24,9 @@ Schematic
 |                  | **Execute–Memory Pipeline**       |   X    |        |      |      |
 |                  | **Memory–Writeback Pipeline**     |   X    |        |      |      |
 |                  | **Hazard Unit**                   |   X   |      |      |      |
-| **Cache**        | **Memory (Refactor)**             |        |        |      |      |
-|                  | **Direct-Mapped Cache**           |        |        |      |      |
-|                  | **Two-Way Set Associative Cache** |        |        |      |      |
+| **Cache**        | **Memory (Refactor)**             |        |    X    |      |      |
+|                  | **Direct-Mapped Cache**           |        |     X   |      |      |
+|                  | **Two-Way Set Associative Cache** |        |      X  |      |      |
 | **Verification** | **F1 Testing**                    |        |        |      |  X   |
 |                  | **PDF Testing**                   |        |        |      |  X   |
 |                  | **System Testing & Debugging**    |        |        |      |  X   |
