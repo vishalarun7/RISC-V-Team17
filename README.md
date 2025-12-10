@@ -23,7 +23,7 @@ Schematic
 |                  | **Decode–Execute Pipeline**       |   X    |        |      |      |
 |                  | **Execute–Memory Pipeline**       |   X    |        |      |      |
 |                  | **Memory–Writeback Pipeline**     |   X    |        |      |      |
-|                  | **Hazard Unit**                   |   *    |   *    |      |      |
+|                  | **Hazard Unit**                   |   X   |      |      |      |
 | **Cache**        | **Memory (Refactor)**             |        |        |      |      |
 |                  | **Direct-Mapped Cache**           |        |        |      |      |
 |                  | **Two-Way Set Associative Cache** |        |        |      |      |
