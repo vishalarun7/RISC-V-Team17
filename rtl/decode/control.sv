@@ -11,8 +11,8 @@ module control(
   output logic        Jump, 
   output logic [2:0]  ImmSrc,     //Imm-type
   output logic [3:0]  ALUControl, //controls the operation to be performed in ALU
-  output logic        AddrMode   //byte and word addressing 
-  
+  output logic        AddrMode,   //byte and word addressing 
+  output logic [2:0]  funct3Out   //pass funct3 for branch type
 );
 
   task ALU_control(
@@ -48,6 +48,7 @@ module control(
     AddrMode = 1'b0;
     Branch = 1'b0;
     Jump = 1'b0;
+    funct3Out = funct3;
 
     case (op)
         // R-type

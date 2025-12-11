@@ -16,6 +16,7 @@ module top #(
     logic RegWriteD, MemWriteD, ALUSrcD, AddrModeD, BranchD, JumpD;
     logic [1:0] ResultSrcD;
     logic [3:0] ALUControlD;
+    logic [2:0] funct3D;
 
     logic [DATA_WIDTH-1:0] RD1E, RD2E, ImmExtE, PCE, PCPlus4E;
     logic [DATA_WIDTH-1:0] SrcAE, SrcBE, ALUResultE, WriteDataE, PCTargetE;
@@ -24,6 +25,7 @@ module top #(
     logic [1:0] ResultSrcE;
     logic [3:0] ALUControlE;
     logic ZeroE;
+    logic [2:0] funct3E;
 
     logic [DATA_WIDTH-1:0] ALUResultM, WriteDataM, PCPlus4M;
     logic [DATA_WIDTH-1:0] ReadDataM;
@@ -85,7 +87,8 @@ module top #(
         .Jump(JumpD),
         .ImmSrc(ImmSrcD),
         .ALUControl(ALUControlD),
-        .AddrMode(AddrModeD)
+        .AddrMode(AddrModeD),
+        .funct3Out(funct3D)
     );
 
     regfile regfile_inst (
@@ -119,6 +122,7 @@ module top #(
         .ALUSrcD(ALUSrcD),
         .ResultSrcD(ResultSrcD),
         .ALUControlD(ALUControlD),
+        .funct3D(funct3D),
         .Rs1D(Rs1D),
         .Rs2D(Rs2D),
         .RdD(RdD),
@@ -135,6 +139,7 @@ module top #(
         .ALUSrcE(ALUSrcE),
         .ResultSrcE(ResultSrcE),
         .ALUControlE(ALUControlE),
+        .funct3E(funct3E),
         .Rs1E(Rs1E),
         .Rs2E(Rs2E),
         .RdE(RdE),
@@ -146,8 +151,23 @@ module top #(
     );
 
     assign PCTargetE = ALUSrcE ? ALUResultE : (PCE + ImmExtE);
+    
+    // Branch condition logic based on funct3
+    logic BranchCondE;
+    always_comb begin
+        case (funct3E)
+            3'b000: BranchCondE = ZeroE;              // beq: branch if equal
+            3'b001: BranchCondE = ~ZeroE;             // bne: branch if not equal
+            3'b100: BranchCondE = ALUResultE[0];      // blt: branch if less than (signed)
+            3'b101: BranchCondE = ~ALUResultE[0];     // bge: branch if greater or equal (signed)
+            3'b110: BranchCondE = ALUResultE[0];      // bltu: branch if less than (unsigned)
+            3'b111: BranchCondE = ~ALUResultE[0];     // bgeu: branch if greater or equal (unsigned)
+            default: BranchCondE = 1'b0;
+        endcase
+    end
+    
     logic BranchTakenE;
-    assign BranchTakenE = BranchE & ZeroE;
+    assign BranchTakenE = BranchE & BranchCondE;
     assign PCSrcE = BranchTakenE | JumpE;
 
     always_comb begin
@@ -244,9 +264,11 @@ module top #(
     .Rs2D(Rs2D),
     .RegWriteM(RegWriteM),
     .RegWriteW(RegWriteW),
+    .RegWriteE(RegWriteE),
     .RdM(RdM),
     .RdW(RdW),
     .ResultSrcE(ResultSrcE),
+    .ResultSrcM(ResultSrcM),
     .BranchD(BranchD),
     .PCSrcE(PCSrcE),
     .ForwardAE(ForwardAE),

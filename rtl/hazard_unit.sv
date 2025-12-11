@@ -3,10 +3,11 @@ module hazard_unit #(
 )(
     input  logic [4:0] Rs1E, Rs2E, RdE,
     input  logic [4:0] Rs1D, Rs2D,
-    input  logic RegWriteM, RegWriteW,
+    input  logic RegWriteM, RegWriteW, RegWriteE,
     input  logic [4:0] RdW, RdM,
-    input  logic [1:0] ResultSrcE,
+    input  logic [1:0] ResultSrcE, ResultSrcM,
     input logic PCSrcE,
+    input logic BranchD,
     output logic [1:0] ForwardAE, ForwardBE,
     output logic StallD, StallF, FlushE, FlushD
 );

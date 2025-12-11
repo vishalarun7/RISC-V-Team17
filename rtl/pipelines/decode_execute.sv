@@ -13,6 +13,7 @@ module decode_execute #(
     input  logic ALUSrcD,
     input  logic [1:0] ResultSrcD,
     input  logic [3:0] ALUControlD,
+    input  logic [2:0] funct3D,
 
     // Data signals 
     input  logic [4:0] Rs1D, Rs2D, RdD,
@@ -28,6 +29,7 @@ module decode_execute #(
     output logic ALUSrcE,
     output logic [1:0] ResultSrcE,
     output logic [3:0] ALUControlE,
+    output logic [2:0] funct3E,
 
     // data outputs 
     output logic [4:0] Rs1E, Rs2E, RdE,
@@ -46,6 +48,7 @@ always_ff @(posedge clk) begin
         ResultSrcE  <= 0;
         ALUControlE <= 0;
         AddrModeE   <= 0;
+        funct3E     <= 0;
     end
     else begin
         //no flush then pass control signals as usual.
@@ -57,6 +60,7 @@ always_ff @(posedge clk) begin
         ResultSrcE  <= ResultSrcD;
         ALUControlE <= ALUControlD;
         AddrModeE   <= AddrModeD;
+        funct3E     <= funct3D;
     end
 
     //pass data
