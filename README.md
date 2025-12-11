@@ -24,8 +24,7 @@ Schematic
 |                  | **Execute–Memory Pipeline**       |   X    |        |      |      |
 |                  | **Memory–Writeback Pipeline**     |   X    |        |      |      |
 |                  | **Hazard Unit**                   |   X   |      |      |      |
-|                  | **System Integration + Debugging**                   |      |      |      |   X   |
-
+|                  | **System Integration + Debugging**|      |      |      |   X   |
 | **Cache**        | **Memory (Refactor)**             |        |    X    |      |      |
 |                  | **Direct-Mapped Cache**           |        |     X   |      |      |
 |                  | **Two-Way Set Associative Cache** |        |      X  |      |      |
