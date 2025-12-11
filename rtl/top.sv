@@ -41,9 +41,7 @@ module top #(
     logic StallF, StallD, FlushD, FlushE;
     logic [1:0] ForwardAE, ForwardBE;
 
-<<<<<<< HEAD
     logic [DATA_WIDTH-1:0] a0_regfile;
-=======
     // alu signals
     logic [DATA_WIDTH-1:0] ALUResult;
 
@@ -55,7 +53,6 @@ module top #(
     logic [127:0]    mem_writedata,
     logic [127:0]   mem_readdata,
     logic           mem_ready
->>>>>>> 127d81a (added cache)
 
     fetch_top #(
     .WIDTH(DATA_WIDTH)
@@ -88,6 +85,33 @@ module top #(
     assign Rs1D = instrD[19:15];
     assign Rs2D = instrD[24:20];
     assign RdD = instrD[11:7];
+
+    cache cache_inst(
+        .clk (clk),
+        .rst (rst),
+        .data_address (ALUResult),
+        .write_data (RD2),
+        .MemWrite (MemWrite),
+        .AddrMode (AddrMode),
+        .read_data (ReadData),
+        .stall(),
+        .mem_req (mem_req),
+        .WriteEnable (WriteEnable),
+        .memory_address (memory_address),
+        .mem_writedata (mem_writedata),
+        .mem_readdata (mem_readdata),
+        .mem_ready (mem_ready),
+    )
+
+   
+
+    logic [DATA_WIDTH-1:0] ReadData;
+    logic            mem_req,
+    logic            WriteEnable,
+    logic [31:0]     memory_address,
+    logic [127:0]    mem_writedata,
+    logic [127:0]   mem_readdata,
+    logic           mem_ready
 
     control control_unit(
         .op(instrD[6:0]),
@@ -125,7 +149,6 @@ module top #(
 
     decode_execute #(
         .DATA_WIDTH(DATA_WIDTH)
-<<<<<<< HEAD
     ) de_reg (
         .clk(clk),
         .FlushE(FlushE),
@@ -163,7 +186,6 @@ module top #(
         .pcE(PCE),
         .PCPlus4E(PCPlus4E),
         .ImmExtE(ImmExtE)
-=======
     ) alu_inst (
         .SrcA (RD1),
         .SrcB (ALUSrc ? ImmExt : RD2),
@@ -199,8 +221,6 @@ module top #(
         .MemWrite (MemWrite),
         .AddrMode (AddrMode),
         .RD (ReadData)
->>>>>>> 127d81a (added cache)
-    );
 
     assign PCTargetE = ALUSrcE ? ALUResultE : (PCE + ImmExtE);
     
