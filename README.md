@@ -21,9 +21,9 @@ Schematic
 |                  | **Top (System Integration)**      |        |   *    |      |  X   |
 | **Pipeline**     | **Fetch–Decode Pipeline**         |   X    |        |      |      |
 |                  | **Decode–Execute Pipeline**       |   X    |        |      |      |
-|                  | **Execute–Memory Pipeline**       |   X    |        |      |      |
+|                  | **Execute–Memory Pipeline**       |   X    |        |      |    *  |
 |                  | **Memory–Writeback Pipeline**     |   X    |        |      |      |
-|                  | **Hazard Unit**                   |   X   |      |      |      |
+|                  | **Hazard Unit**                   |   X   |      |      |  *    |
 | **Cache**        | **Memory (Refactor)**             |        |    X    |      |      |
 |                  | **Direct-Mapped Cache**           |        |     X   |      |      |
 |                  | **Two-Way Set Associative Cache** |        |      X  |      |      |
