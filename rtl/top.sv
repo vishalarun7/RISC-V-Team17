@@ -247,6 +247,7 @@ module top #(
     .RdM(RdM),
     .RdW(RdW),
     .ResultSrcE(ResultSrcE),
+    .BranchD(BranchD),
     .PCSrcE(PCSrcE),
     .ForwardAE(ForwardAE),
     .ForwardBE(ForwardBE),

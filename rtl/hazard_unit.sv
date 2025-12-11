@@ -42,9 +42,24 @@ module hazard_unit #(
         end
     end
 
-    assign StallF = lwStall;
-    assign StallD = lwStall;
-    assign FlushE = lwStall | PCSrcE;
-    assign FlushD = PCSrcE;
+    logic branchStall;
+
+always_comb begin
+    branchStall = 1'b0;
+
+    // EX stage hazard
+    if (BranchD && RegWriteE && ((RdE == Rs1D) || (RdE == Rs2D))) begin
+        branchStall = 1'b1;
+    end
+    // MEM stage hazard (load that hasn’t written back)
+    else if (BranchD && (ResultSrcM == 2'b01) && ((RdM == Rs1D) || (RdM == Rs2D))) begin
+        branchStall = 1'b1;
+    end
+end
+
+assign StallF = lwStall | branchStall;
+assign StallD = lwStall | branchStall;
+assign FlushE = lwStall | branchStall | PCSrcE;
+assign FlushD = PCSrcE;
 
 endmodule
