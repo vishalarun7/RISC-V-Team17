@@ -1,17 +1,14 @@
 module top #(
     parameter DATA_WIDTH = 32,
-              ADDR_WIDTH = 32
 ) (
     input  logic clk,
     input  logic rst,
     input  logic trigger,
     output logic [DATA_WIDTH-1:0] a0
 );
-    // ========== FETCH STAGE SIGNALS ==========
     logic [DATA_WIDTH-1:0] instrF, PCPlus4F, PCF;
-    logic [1:0] PCSrcE;
-    
-    // ========== DECODE STAGE SIGNALS ==========
+    logic PCSrcE;
+
     logic [DATA_WIDTH-1:0] instrD, PCPlus4D, PCD;
     logic [DATA_WIDTH-1:0] RD1D, RD2D, ImmExtD;
     logic [4:0] Rs1D, Rs2D, RdD;
@@ -19,61 +16,45 @@ module top #(
     logic RegWriteD, MemWriteD, ALUSrcD, AddrModeD, BranchD, JumpD;
     logic [1:0] ResultSrcD;
     logic [3:0] ALUControlD;
-    logic MemReadD;
-    
-    // ========== EXECUTE STAGE SIGNALS ==========
+
     logic [DATA_WIDTH-1:0] RD1E, RD2E, ImmExtE, PCE, PCPlus4E;
-    logic [DATA_WIDTH-1:0] SrcAE, SrcBE, ALUResultE, WriteDataE;
+    logic [DATA_WIDTH-1:0] SrcAE, SrcBE, ALUResultE, WriteDataE, PCTargetE;
     logic [4:0] Rs1E, Rs2E, RdE;
     logic RegWriteE, MemWriteE, ALUSrcE, AddrModeE, BranchE, JumpE;
     logic [1:0] ResultSrcE;
     logic [3:0] ALUControlE;
-    logic ZeroE, NegativeE;
-    logic MemReadE;
-    
-    // ========== MEMORY STAGE SIGNALS ==========
+    logic ZeroE;
+
     logic [DATA_WIDTH-1:0] ALUResultM, WriteDataM, PCPlus4M;
     logic [DATA_WIDTH-1:0] ReadDataM;
     logic [4:0] RdM;
-    logic RegWriteM, MemWriteM, AddrModeM, MemReadM;
+    logic RegWriteM, MemWriteM, AddrModeM;
     logic [1:0] ResultSrcM;
-    
-    // ========== WRITEBACK STAGE SIGNALS ==========
+
     logic [DATA_WIDTH-1:0] ALUResultW, ReadDataW, PCPlus4W, ResultW;
     logic [4:0] RdW;
     logic RegWriteW;
     logic [1:0] ResultSrcW;
-    
-    // ========== HAZARD UNIT SIGNALS ==========
-    logic StallF, StallD, FlushE, FlushD;
+
+    logic StallF, StallD, FlushD, FlushE;
     logic [1:0] ForwardAE, ForwardBE;
 
     logic [DATA_WIDTH-1:0] a0_regfile;
 
-    // ----------------------------
-    // FETCH STAGE
-    // ----------------------------
     fetch_top #(
-        .DATA_WIDTH(DATA_WIDTH),
-        .ADDRESS_WIDTH(ADDR_WIDTH)
-    ) fetch_inst (
-        .clk(clk),
-        .rst(rst),
-        .PCSrc(PCSrcE),
-        .ALUResult(ALUResultE),
-        .ImmExt(ImmExtE),
-        .stall(StallF),
-        .flush(FlushD),
-        .instr(instrF),
-        .PCPlus4(PCPlus4F)
+    .WIDTH(DATA_WIDTH)
+    ) fetch_stage (
+        .clk      (clk),
+        .rst      (rst),
+        .PCSrcE   (PCSrcE),
+        .Stall    (StallF),
+        .PCTarget (PCTargetE),
+        .instr    (instrF),
+        .PCPlus4  (PCPlus4F)
     );
-    
-    // Need to extract PC from fetch for pipeline register
-    assign PCF = PCPlus4F - 4;
 
-    // ----------------------------
-    // FETCH/DECODE PIPELINE REGISTER
-    // ----------------------------
+
+    assign PCF = PCPlus4F - 4;
     fetch_decode #(
         .DATA_WIDTH(DATA_WIDTH)
     ) fd_reg (
@@ -88,17 +69,11 @@ module top #(
         .pcD(PCD)
     );
 
-    // ----------------------------
-    // DECODE STAGE
-    // ----------------------------
-    
-    // Extract register addresses
     assign Rs1D = instrD[19:15];
     assign Rs2D = instrD[24:20];
     assign RdD = instrD[11:7];
-    
-    // Control Unit
-    control control_inst (
+
+    control control_unit(
         .op(instrD[6:0]),
         .funct3(instrD[14:12]),
         .funct7(instrD[30]),
@@ -112,10 +87,7 @@ module top #(
         .ALUControl(ALUControlD),
         .AddrMode(AddrModeD)
     );
-    
-    assign MemReadD = (instrD[6:0] == 7'b0000011); // Load instruction
-    
-    // Register File
+
     regfile regfile_inst (
         .clk(clk),
         .AD1(Rs1D),
@@ -127,18 +99,13 @@ module top #(
         .RD2(RD2D),
         .a0(a0_regfile)
     );
-    assign a0 = a0_regfile;
-    
-    // Immediate Extension
+
     immext immext_inst (
         .instr(instrD),
         .ImmSrc(ImmSrcD),
         .ImmExt(ImmExtD)
     );
 
-    // ----------------------------
-    // DECODE/EXECUTE PIPELINE REGISTER
-    // ----------------------------
     decode_execute #(
         .DATA_WIDTH(DATA_WIDTH)
     ) de_reg (
@@ -152,7 +119,6 @@ module top #(
         .ALUSrcD(ALUSrcD),
         .ResultSrcD(ResultSrcD),
         .ALUControlD(ALUControlD),
-        .MemReadD(MemReadD),
         .Rs1D(Rs1D),
         .Rs2D(Rs2D),
         .RdD(RdD),
@@ -169,7 +135,6 @@ module top #(
         .ALUSrcE(ALUSrcE),
         .ResultSrcE(ResultSrcE),
         .ALUControlE(ALUControlE),
-        .MemReadE(MemReadE),
         .Rs1E(Rs1E),
         .Rs2E(Rs2E),
         .RdE(RdE),
@@ -180,11 +145,11 @@ module top #(
         .ImmExtE(ImmExtE)
     );
 
-    // ----------------------------
-    // EXECUTE STAGE
-    // ----------------------------
-    
-    // Forwarding Multiplexers
+    assign PCTargetE = PCE + ImmExtE;
+    logic BranchTakenE;
+    assign BranchTakenE = BranchE & ZeroE;
+    assign PCSrcE = BranchTakenE | JumpE;
+
     always_comb begin
         case (ForwardAE)
             2'b00: SrcAE = RD1E;
@@ -192,7 +157,7 @@ module top #(
             2'b10: SrcAE = ALUResultM;
             default: SrcAE = RD1E;
         endcase
-        
+
         case (ForwardBE)
             2'b00: WriteDataE = RD2E;
             2'b01: WriteDataE = ResultW;
@@ -202,30 +167,23 @@ module top #(
     end
     
     assign SrcBE = ALUSrcE ? ImmExtE : WriteDataE;
-    
-    // ALU
-    alu #(.DATA_WIDTH(DATA_WIDTH)) alu_inst (
-        .SrcA(SrcAE),
-        .SrcB(SrcBE),
-        .ALUControl(ALUControlE),
-        .ALUResult(ALUResultE),
-        .Zero(ZeroE),
-        .Negative(NegativeE)
-    );
-    
-    // Branch/Jump Logic
-    assign PCSrcE = {1'b0, (JumpE | (BranchE & ZeroE))};
 
-    // ----------------------------
-    // EXECUTE/MEMORY PIPELINE REGISTER
-    // ----------------------------
+    alu #(.DATA_WIDTH(DATA_WIDTH)) 
+    alu_inst (
+    .SrcA(SrcAE),
+    .SrcB(SrcBE),
+    .ALUControl(ALUControlE),
+    .ALUResult(ALUResultE),
+    .Zero(ZeroE),
+    .Negative()
+    );
+
     execute_memory #(
         .DATA_WIDTH(DATA_WIDTH)
     ) em_reg (
         .clk(clk),
         .RegWriteE(RegWriteE),
         .MemWriteE(MemWriteE),
-        .MemReadE(MemReadE),
         .ResultSrcE(ResultSrcE),
         .RdE(RdE),
         .PCPlus4E(PCPlus4E),
@@ -234,7 +192,6 @@ module top #(
         .AddrModeE(AddrModeE),
         .RegWriteM(RegWriteM),
         .MemWriteM(MemWriteM),
-        .MemReadM(MemReadM),
         .ResultSrcM(ResultSrcM),
         .RdM(RdM),
         .ALUResultM(ALUResultM),
@@ -243,10 +200,7 @@ module top #(
         .AddrModeM(AddrModeM)
     );
 
-    // ----------------------------
-    // MEMORY STAGE
-    // ----------------------------
-    datamem #(.WIDTH(DATA_WIDTH)) datamem_inst (
+     datamem #(.WIDTH(DATA_WIDTH)) datamem_inst (
         .clk(clk),
         .aluresult(ALUResultM),
         .RD2(WriteDataM),
@@ -255,9 +209,6 @@ module top #(
         .RD(ReadDataM)
     );
 
-    // ----------------------------
-    // MEMORY/WRITEBACK PIPELINE REGISTER
-    // ----------------------------
     memory_writeback #(
         .DATA_WIDTH(DATA_WIDTH)
     ) mw_reg (
@@ -276,43 +227,34 @@ module top #(
         .PCPlus4W(PCPlus4W)
     );
 
-    // ----------------------------
-    // WRITEBACK STAGE
-    // ----------------------------
     always_comb begin
         case (ResultSrcW)
             2'b00: ResultW = ALUResultW;
             2'b01: ResultW = ReadDataW;
             2'b10: ResultW = PCPlus4W;
-            2'b11: ResultW = ALUResultW; // LUI handled in ALU
             default: ResultW = ALUResultW;
         endcase
     end
 
-    // ----------------------------
-    // HAZARD UNIT
-    // ----------------------------
-    hazard_unit #(
-        .DATA_WIDTH(DATA_WIDTH)
-    ) hazard_inst (
-        .Rs1D(Rs1D),
-        .Rs2D(Rs2D),
-        .Rs1E(Rs1E),
-        .Rs2E(Rs2E),
-        .RdE(RdE),
-        .RdM(RdM),
-        .RdW(RdW),
-        .RegWriteM(RegWriteM),
-        .RegWriteW(RegWriteW),
-        .ResultSrcE(ResultSrcE),
-        .ForwardAE(ForwardAE),
-        .ForwardBE(ForwardBE),
-        .StallF(StallF),
-        .StallD(StallD),
-        .FlushE(FlushE)
-    );
-    
-    // Control hazard: flush decode stage on branch/jump taken
-    assign FlushD = PCSrcE[0];
+
+    hazard_unit hazard (
+    .Rs1E(Rs1E),
+    .Rs2E(Rs2E),
+    .RdE(RdE),
+    .Rs1D(Rs1D),
+    .Rs2D(Rs2D),
+    .RegWriteM(RegWriteM),
+    .RegWriteW(RegWriteW),
+    .RdM(RdM),
+    .RdW(RdW),
+    .ResultSrcE(ResultSrcE),
+    .PCSrcE(PCSrcE),
+    .ForwardAE(ForwardAE),
+    .ForwardBE(ForwardBE),
+    .StallD(StallD),
+    .StallF(StallF),
+    .FlushE(FlushE),
+    .FlushD(FlushD)
+);
 
 endmodule

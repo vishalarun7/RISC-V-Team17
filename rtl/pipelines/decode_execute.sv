@@ -13,7 +13,6 @@ module decode_execute #(
     input  logic ALUSrcD,
     input  logic [1:0] ResultSrcD,
     input  logic [3:0] ALUControlD,
-    input  logic MemReadD,
 
     // Data signals 
     input  logic [4:0] Rs1D, Rs2D, RdD,
@@ -29,7 +28,6 @@ module decode_execute #(
     output logic ALUSrcE,
     output logic [1:0] ResultSrcE,
     output logic [3:0] ALUControlE,
-    output logic MemReadE,
 
     // data outputs 
     output logic [4:0] Rs1E, Rs2E, RdE,
@@ -42,7 +40,6 @@ always_ff @(posedge clk) begin
     if (FlushE) begin
         RegWriteE   <= 0;
         MemWriteE   <= 0;
-        MemReadE    <= 0;
         JumpE       <= 0;
         BranchE     <= 0;
         ALUSrcE     <= 0;
@@ -54,7 +51,6 @@ always_ff @(posedge clk) begin
         //no flush then pass control signals as usual.
         RegWriteE   <= RegWriteD;
         MemWriteE   <= MemWriteD;
-        MemReadE    <= MemReadD;
         JumpE       <= JumpD;
         BranchE     <= BranchD;
         ALUSrcE     <= ALUSrcD;

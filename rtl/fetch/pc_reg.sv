@@ -9,12 +9,12 @@ module pc_reg #(
 );
 
 always_ff @(posedge clk) begin
-    if (rst) 
-        PC <= {WIDTH{1'b0}}; 
-    if (StallF)
-        PC<=PC;
-    else 
-        PC <= PCnext; 
+    if (rst) begin
+        PC <= {WIDTH{1'b0}};
+    end
+    else if (!StallF) begin
+        PC <= PCnext;
+    end
 end
 
 endmodule

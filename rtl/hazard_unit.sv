@@ -1,18 +1,18 @@
 module hazard_unit #(
     parameter DATA_WIDTH = 32
 )(
-    input logic [4:0] Rs1E, Rs2E, Rs1D, Rs2D, RdE,
-    input logic RegWriteM, RegWriteW,
-    input logic [4:0] RdW, RdM,
-    input logic [1:0] ResultSrcE,
-    output logic [1:0] ForwardAE, ForwardBE, 
-    output logic StallD, StallF, FlushE
+    input  logic [4:0] Rs1E, Rs2E, RdE,
+    input  logic [4:0] Rs1D, Rs2D,
+    input  logic RegWriteM, RegWriteW,
+    input  logic [4:0] RdW, RdM,
+    input  logic [1:0] ResultSrcE,
+    input logic PCSrcE; 
+    output logic [1:0] ForwardAE, ForwardBE,
+    output logic StallD, StallF, FlushE, FlushD
 );
     logic lwStall;
 
-    // Forwarding logic
     always_comb begin
-        // Default
         ForwardAE = 2'b00;
         ForwardBE = 2'b00;
 
@@ -32,7 +32,7 @@ module hazard_unit #(
         end
     end
 
-    // Stall logic for load-use hazard
+    // if either source reg in decode stage == destination in exec and instruction is a lw, then stall
     always_comb begin
         if (ResultSrcE == 2'b01 && ((Rs1D == RdE) || (Rs2D == RdE))) begin
             lwStall = 1'b1;
@@ -44,6 +44,7 @@ module hazard_unit #(
 
     assign StallF = lwStall;
     assign StallD = lwStall;
-    assign FlushE = lwStall;
+    assign FlushE = lwStall | PCSrcE;
+    assign FlushD = PCSrcE;
 
 endmodule

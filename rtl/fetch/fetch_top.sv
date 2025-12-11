@@ -1,52 +1,38 @@
 module fetch_top #(
-    parameter DATA_WIDTH = 32,
-    parameter ADDRESS_WIDTH = 32
+    parameter WIDTH = 32;
 )(
     input logic clk, 
     input logic rst, 
-    input logic [1:0] PCSrc, 
-    input logic [DATA_WIDTH-1:0] ALUResult,
-    input logic [DATA_WIDTH-1:0] ImmExt,
-    input logic stall,
-    input logic flush,
-    
-    output logic [ADDRESS_WIDTH-1:0] instr,
-    output logic [DATA_WIDTH-1:0] PCPlus4
+    input logic PCSrcE,  // 1 -> use PCTarget, 0 -> PC+4
+    input logic Stall,
+    input logic [WIDTH-1:0] PCTarget,     
+
+    output logic [WIDTH-1:0] instr,
+    output logic [WIDTH-1:0] PCPlus4,
 );
 
-    logic [DATA_WIDTH-1:0] PC;
-    logic [DATA_WIDTH-1:0] PCTarget;
-    logic [DATA_WIDTH-1:0] PCNext;
+    logic [WIDTH-1:0] PC;
+    logic [WIDTH-1:0] PCNext;
 
+    mux2 PCMUX(
+        .in0 (PCPlus4),
+        .in1 (PCTarget),
+        .sel (PCSrcE),
+        .out (PCNext)
+    );
+    
+    pc_reg PC_REG(
+        .clk (clk),
+        .rst (rst), 
+        .StallF (Stall),
+        .PCnext (PCNext),
+        .PC (PC)
+    );
     adder PCPlus4_adder(
         .in0 (PC),
         .in1 (32'd4),
         .out (PCPlus4)
     );
-
-    adder PCTarget_adder(
-        .in0(PC),
-        .in1(ImmExt),
-        .out (PCTarget)
-    );
-
-    pc_reg PC_REG(
-        .clk (clk),
-        .rst (rst), 
-        .StallF (stall),
-        .PCnext (PCNext),
-        .PC (PC)
-    );
-
-    mux4 PCMux(
-        .in0 (PCPlus4),
-        .in1 (PCTarget),
-        .in2 (ALUResult),
-        .in3 (PC),
-        .sel (PCSrc),
-        .out (PCNext)
-    );
-
     instr_mem INSTR_MEM(
         .addr (PC),
         .instr (instr)
