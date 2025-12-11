@@ -47,12 +47,13 @@ module top #(
 
     // data memory signals
     logic [DATA_WIDTH-1:0] ReadData;
-    logic            mem_req,
-    logic            WriteEnable,
-    logic [31:0]     memory_address,
-    logic [127:0]    mem_writedata,
-    logic [127:0]   mem_readdata,
-    logic           mem_ready
+logic                  mem_req;
+logic                  WriteEnable;
+logic [31:0]           memory_address;
+logic [127:0]          mem_writedata;
+logic [127:0]          mem_readdata;
+logic                  mem_ready;
+
 
     logic            mem_req;
     logic            WriteEnable;
@@ -109,16 +110,6 @@ module top #(
         .mem_readdata (mem_readdata),
         .mem_ready (mem_ready),
     )
-
-   
-
-    logic [DATA_WIDTH-1:0] ReadData;
-    logic            mem_req,
-    logic            WriteEnable,
-    logic [31:0]     memory_address,
-    logic [127:0]    mem_writedata,
-    logic [127:0]   mem_readdata,
-    logic           mem_ready
 
     control control_unit(
         .op(instrD[6:0]),
