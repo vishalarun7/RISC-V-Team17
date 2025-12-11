@@ -6,7 +6,7 @@ module hazard_unit #(
     input  logic RegWriteM, RegWriteW,
     input  logic [4:0] RdW, RdM,
     input  logic [1:0] ResultSrcE,
-    input logic PCSrcE; 
+    input logic PCSrcE,
     output logic [1:0] ForwardAE, ForwardBE,
     output logic StallD, StallF, FlushE, FlushD
 );

@@ -9,4 +9,3 @@ module mux2 #(
     assign out = sel ? in1 : in0;
 
 endmodule
-

@@ -1,5 +1,5 @@
 module top #(
-    parameter DATA_WIDTH = 32,
+    parameter DATA_WIDTH = 32
 ) (
     input  logic clk,
     input  logic rst,
@@ -50,11 +50,11 @@ module top #(
         .Stall    (StallF),
         .PCTarget (PCTargetE),
         .instr    (instrF),
-        .PCPlus4  (PCPlus4F)
+        .PCPlus4  (PCPlus4F),
+        .PC         (PCF)
     );
 
 
-    assign PCF = PCPlus4F - 4;
     fetch_decode #(
         .DATA_WIDTH(DATA_WIDTH)
     ) fd_reg (
@@ -174,8 +174,7 @@ module top #(
     .SrcB(SrcBE),
     .ALUControl(ALUControlE),
     .ALUResult(ALUResultE),
-    .Zero(ZeroE),
-    .Negative()
+    .Zero(ZeroE)
     );
 
     execute_memory #(
@@ -256,5 +255,9 @@ module top #(
     .FlushE(FlushE),
     .FlushD(FlushD)
 );
+
+always_ff @(posedge clk) begin
+    $display("WB stage: RegWriteW=%0d RdW=%0d ResultW=0x%08h", RegWriteW, RdW, ResultW);
+end
 
 endmodule

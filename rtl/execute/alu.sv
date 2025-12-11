@@ -5,8 +5,7 @@ module alu #(
     input logic [DATA_WIDTH-1:0] SrcB,
     input logic [3:0] ALUControl,
     output logic [DATA_WIDTH-1:0] ALUResult,
-    output logic Zero,
-    output logic Negative
+    output logic Zero
 );
 
     always_comb begin
@@ -26,6 +25,5 @@ module alu #(
     end
 
     assign Zero = (ALUResult == 0);
-    assign Negative = ALUResult[31];
 
 endmodule

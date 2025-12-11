@@ -1,5 +1,5 @@
 module fetch_top #(
-    parameter WIDTH = 32;
+    parameter WIDTH = 32
 )(
     input logic clk, 
     input logic rst, 
@@ -9,9 +9,10 @@ module fetch_top #(
 
     output logic [WIDTH-1:0] instr,
     output logic [WIDTH-1:0] PCPlus4,
+    output logic [WIDTH-1:0] PC
+
 );
 
-    logic [WIDTH-1:0] PC;
     logic [WIDTH-1:0] PCNext;
 
     mux2 PCMUX(
