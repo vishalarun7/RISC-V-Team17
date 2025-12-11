@@ -279,9 +279,6 @@ module top #(
     .FlushD(FlushD)
 );
 
-// always_ff @(posedge clk) begin
-//     $display("WB stage: RegWriteW=%0d RdW=%0d ResultW=0x%08h", RegWriteW, RdW, ResultW);
-// end
 
 assign a0 = a0_regfile;
 
