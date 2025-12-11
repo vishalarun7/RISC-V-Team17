@@ -22,22 +22,22 @@ module datamem #(
     always_ff @(posedge clk) begin
         mem_ready <= 0;
         if (mem_req && WriteEnable) begin
-            ram_array[memory_address] <= mem_writedata[7:0];
-            ram_array[memory_address+1] <= mem_writedata[15:8];
-            ram_array[memory_address+2] <= mem_writedata[23:16];
-            ram_array[memory_address+3] <= mem_writedata[31:24];
-            ram_array[memory_address+4] <= mem_writedata[39:32];
-            ram_array[memory_address+5] <= mem_writedata[47:40];
-            ram_array[memory_address+6] <= mem_writedata[55:48];
-            ram_array[memory_address+7] <= mem_writedata[63:56];
-            ram_array[memory_address+8] <= mem_writedata[71:64];
-            ram_array[memory_address+9] <= mem_writedata[79:72];
-            ram_array[memory_address+10] <= mem_writedata[87:80];
-            ram_array[memory_address+11] <= mem_writedata[95:88];
-            ram_array[memory_address+12] <= mem_writedata[103:96];
-            ram_array[memory_address+13] <= mem_writedata[111:104];
-            ram_array[memory_address+14] <= mem_writedata[119:112];
-            ram_array[memory_address+15] <= mem_writedata[127:120];
+            ram_array[memory_address+15] <= mem_writedata[7:0];
+            ram_array[memory_address+14] <= mem_writedata[15:8];
+            ram_array[memory_address+13] <= mem_writedata[23:16];
+            ram_array[memory_address+12] <= mem_writedata[31:24];
+            ram_array[memory_address+11] <= mem_writedata[39:32];
+            ram_array[memory_address+10] <= mem_writedata[47:40];
+            ram_array[memory_address+9] <= mem_writedata[55:48];
+            ram_array[memory_address+8] <= mem_writedata[63:56];
+            ram_array[memory_address+7] <= mem_writedata[71:64];
+            ram_array[memory_address+6] <= mem_writedata[79:72];
+            ram_array[memory_address+5] <= mem_writedata[87:80];
+            ram_array[memory_address+4] <= mem_writedata[95:88];
+            ram_array[memory_address+3] <= mem_writedata[103:96];
+            ram_array[memory_address+2] <= mem_writedata[111:104];
+            ram_array[memory_address+1] <= mem_writedata[119:112];
+            ram_array[memory_address] <= mem_writedata[127:120];
 
             mem_ready <= 1;
         end

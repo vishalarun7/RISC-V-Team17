@@ -8,7 +8,6 @@ module cache #(
     parameter d = 149,
     parameter t = 148,
     parameter t_ = 128
-
 )(
 
     // cache-cpu
@@ -77,6 +76,7 @@ module cache #(
         case (state)
             IDLE: begin
                 if (!hit) begin
+                    stall = 1;
                     if (dirty) begin
                         next_state = WRITE_BACK;
                     end 
@@ -194,8 +194,14 @@ module cache #(
         if (rst) begin
             victim_reg <= 0;
             state <= IDLE;
+            for (int i = 0; i < ways; i++) begin
+                for (int j = 0; j < sets; j++) begin
+                    cache[i][j][v] <= 0;
+                end
+            end
         end
         else begin
+            read_data <= 32'b0;
             state <= next_state;
         end
 
@@ -243,9 +249,17 @@ module cache #(
             cache[victim_reg][set][127:0] <= mem_readdata;
             cache[victim_reg][set][t:t_]   <= tag;
             cache[victim_reg][set][v]      <= 1;
-            cache[victim_reg][set][d]      <= 0;
+            cache[victim_reg][set][d]      <= MemWrite;
             cache[victim_reg][set][u]      <= 1;
             cache[!victim_reg][set][u]     <= 0;
+            if (MemWrite) begin
+                if (!AddrMode) begin
+                    cache[victim_reg][set][(block_offset*32) +: 32] <= write_data;
+                end 
+                else begin
+                    cache[victim_reg][set][(block_offset*32)+(byte_offset*8) +: 8] <= write_data[7:0];
+                end                
+            end
         end
     end
 
