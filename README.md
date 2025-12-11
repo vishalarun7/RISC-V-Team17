@@ -21,10 +21,14 @@ Schematic
 |                  | **Top (System Integration)**      |        |   *    |      |  X   |
 | **Pipeline**     | **Fetch–Decode Pipeline**         |   X    |        |      |      |
 |                  | **Decode–Execute Pipeline**       |   X    |        |      |      |
-|                  | **Execute–Memory Pipeline**       |   X    |        |      |      |
+|                  | **Execute–Memory Pipeline**       |   X    |        |      |    *  |
 |                  | **Memory–Writeback Pipeline**     |   X    |        |      |      |
+<<<<<<< HEAD
 |                  | **Hazard Unit**                   |   X   |      |      |      |
 |                  | **System Integration + Debugging**                   |      |      |      |   X   |
+=======
+|                  | **Hazard Unit**                   |   X   |      |      |  *    |
+>>>>>>> f3d37ca (update readme)
 | **Cache**        | **Memory (Refactor)**             |        |    X    |      |      |
 |                  | **Direct-Mapped Cache**           |        |     X   |      |      |
 |                  | **Two-Way Set Associative Cache** |        |      X  |      |      |
