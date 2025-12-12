@@ -95,7 +95,7 @@ module control(
 
         // U-type (lui)
         7'b0110111: begin 
-            RegWrite = 1'b1; ImmSrc = 3'b100; MemWrite = 1'b0; ResultSrc = 2'b11; Jump = 1'b0; Branch = 1'b0; 
+            RegWrite = 1'b1; ImmSrc = 3'b100; MemWrite = 1'b0; ResultSrc = 2'b00; Jump = 1'b0; Branch = 1'b0; ALUSrc  = 1'b1; ALUControl = 4'b0000;
         end
 
         // J-type (jal)

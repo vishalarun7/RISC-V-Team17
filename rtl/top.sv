@@ -226,6 +226,7 @@ module top #(
         .MemWrite(MemWriteM),
         .AddrMode(AddrModeM),
         .RD(ReadDataM)
+        
     );
 
     memory_writeback #(
