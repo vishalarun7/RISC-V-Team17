@@ -137,6 +137,7 @@ module top #(
         .ResultSrcD(ResultSrcD),
         .ALUControlD(ALUControlD),
         .funct3D(funct3D),
+        .StallE(StallD),
         .Rs1D(Rs1D),
         .Rs2D(Rs2D),
         .RdD(RdD),

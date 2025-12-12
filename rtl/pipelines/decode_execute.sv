@@ -3,6 +3,7 @@ module decode_execute #(
 )(
     input  logic clk,
     input  logic FlushE,
+    input logic StallE,
 
     // control signals 
     input  logic AddrModeD,
@@ -38,7 +39,6 @@ module decode_execute #(
 );
 
 always_ff @(posedge clk) begin
-
     if (FlushE) begin
         RegWriteE   <= 0;
         MemWriteE   <= 0;
@@ -49,9 +49,17 @@ always_ff @(posedge clk) begin
         ALUControlE <= 0;
         AddrModeE   <= 0;
         funct3E     <= 0;
+
+        Rs1E    <= 0;
+        Rs2E    <= 0;
+        RdE     <= 0;
+        RD1E    <= 0;
+        RD2E    <= 0;
+        pcE     <= 0;
+        PCPlus4E<= 0;
+        ImmExtE <= 0;
     end
-    else begin
-        //no flush then pass control signals as usual.
+    else if (~StallE) begin
         RegWriteE   <= RegWriteD;
         MemWriteE   <= MemWriteD;
         JumpE       <= JumpD;
@@ -61,18 +69,17 @@ always_ff @(posedge clk) begin
         ALUControlE <= ALUControlD;
         AddrModeE   <= AddrModeD;
         funct3E     <= funct3D;
+
+        Rs1E    <= Rs1D;
+        Rs2E    <= Rs2D;
+        RdE     <= RdD;
+        RD1E    <= RD1D;
+        RD2E    <= RD2D;
+        pcE     <= pcD;
+        PCPlus4E<= PCPlus4D;
+        ImmExtE <= ImmExtD;
     end
-
-    //pass data
-    Rs1E    <= Rs1D;
-    Rs2E    <= Rs2D;
-    RdE     <= RdD;
-    RD1E    <= RD1D;
-    RD2E    <= RD2D;
-    pcE     <= pcD;
-    PCPlus4E<= PCPlus4D;
-    ImmExtE <= ImmExtD;
-
 end
+
 
 endmodule
