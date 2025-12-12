@@ -29,11 +29,13 @@ module top #(
 
     logic [DATA_WIDTH-1:0] ALUResultM, WriteDataM, PCPlus4M;
     logic [DATA_WIDTH-1:0] ReadDataM;
+    logic [DATA_WIDTH-1:0] ImmExtM;
     logic [4:0] RdM;
     logic RegWriteM, MemWriteM, AddrModeM;
     logic [1:0] ResultSrcM;
 
     logic [DATA_WIDTH-1:0] ALUResultW, ReadDataW, PCPlus4W, ResultW;
+    logic [DATA_WIDTH-1:0] ImmExtW;
     logic [4:0] RdW;
     logic RegWriteW;
     logic [1:0] ResultSrcW;
@@ -221,6 +223,7 @@ module top #(
         .ALUResultE(ALUResultE),
         .WriteDataE(WriteDataE),
         .AddrModeE(AddrModeE),
+        .ImmExtE(ImmExtE),
         .RegWriteM(RegWriteM),
         .MemWriteM(MemWriteM),
         .ResultSrcM(ResultSrcM),
@@ -228,7 +231,8 @@ module top #(
         .ALUResultM(ALUResultM),
         .WriteDataM(WriteDataM),
         .PCPlus4M(PCPlus4M),
-        .AddrModeM(AddrModeM)
+        .AddrModeM(AddrModeM),
+        .ImmExtM(ImmExtM)
     );
 
      datamem #(.WIDTH(DATA_WIDTH)) datamem_inst (
@@ -273,12 +277,14 @@ module top #(
         .ALUResultM(ALUResultM),
         .ReadDataM(ReadDataM),
         .PCPlus4M(PCPlus4M),
+        .ImmExtM(ImmExtM),
         .RegWriteW(RegWriteW),
         .ResultSrcW(ResultSrcW),
         .RdW(RdW),
         .ALUResultW(ALUResultW),
         .ReadDataW(ReadDataW),
-        .PCPlus4W(PCPlus4W)
+        .PCPlus4W(PCPlus4W),
+        .ImmExtW(ImmExtW)
     );
 
     always_comb begin
@@ -286,6 +292,7 @@ module top #(
             2'b00: ResultW = ALUResultW;
             2'b01: ResultW = ReadDataW;
             2'b10: ResultW = PCPlus4W;
+            2'b11: ResultW = ImmExtW;
             default: ResultW = ALUResultW;
         endcase
     end

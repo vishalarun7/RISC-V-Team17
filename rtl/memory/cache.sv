@@ -202,7 +202,6 @@ module cache #(
             end
         end
         else begin
-            read_data <= 32'b0;
             state <= next_state;
         end
 

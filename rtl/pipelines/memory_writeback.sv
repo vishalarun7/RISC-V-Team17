@@ -9,13 +9,15 @@ module memory_writeback#(
     input  logic [DATA_WIDTH-1:0] ALUResultM,
     input  logic [DATA_WIDTH-1:0] ReadDataM,
     input  logic [DATA_WIDTH-1:0] PCPlus4M,
+    input  logic [DATA_WIDTH-1:0] ImmExtM,
     
     output logic                  RegWriteW,
     output logic [1:0]            ResultSrcW,
     output logic [4:0]            RdW,
     output logic [DATA_WIDTH-1:0] ALUResultW,
     output logic [DATA_WIDTH-1:0] ReadDataW,
-    output logic [DATA_WIDTH-1:0] PCPlus4W
+    output logic [DATA_WIDTH-1:0] PCPlus4W,
+    output logic [DATA_WIDTH-1:0] ImmExtW
 );
 
     always_ff @(posedge clk) begin
@@ -25,6 +27,7 @@ module memory_writeback#(
         ALUResultW <= ALUResultM;
         ReadDataW  <= ReadDataM;
         PCPlus4W   <= PCPlus4M;
+        ImmExtW    <= ImmExtM;
     end
 
 endmodule
