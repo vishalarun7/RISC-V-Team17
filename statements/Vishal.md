@@ -1,68 +1,229 @@
-Vishal Arun
-CID: 02636117
+# Vishal Arun (CID:02636117)    
 
-Overview
+# Table of contents
+- Single cycle
+	- Control Unit + Fetch - Top
+    - Sign Extension Unit 
+    - Instruction Memory
+    - Data Memory
 
-
-
-
-
-
-
-##Single Cycle 
-Instruction Memory
-
-Sign Extension Unit
-
-Control Unit
-
-Data Memory
-
+- Pipelining
+	- Fetch–Decode Pipeline
+    - Decode–Execute Pipeline	
+    - Execute–Memory Pipeline	
+    - Memory–Writeback Pipeline	
+    - Hazard Unit
+	- Debugging 
+- Further Improvements 
+- Takeaways
 
 
-##Pipelined
+# Single Cycle
 
-Code that could not be carried forward from my Single-Cycle design
+## Control Unit
 
-Why flags cannot be used in Decode stage
-When you are in Decode stage (ID):
-* The branch instruction is only being decoded.
-* The ALU has not yet executed the comparison.
-* So the Zero flag you want does not exist yet.
-Pipeline timing:
-Stage	What’s happening?
-ID	We decode a branch (beq, blt…)
-EX	Only here do we subtract rs1 - rs2 and compute Zero/Negative
-MEM	Optional for branch
-WB	N/A
-Therefore:
-❗ Branch decision is ONLY valid in the Execute stage, not Decode.
-If you try to use the flag in Decode, you are using the previous instruction’s flag → wrong.
-This causes:
-* Incorrect branching
-* Nasty pipeline hazards
-* Random jump behaviour
+- I implemented logic for R-type, I-type, S-type, B-type, U-type, and J-type instructions, ensuring each instruction type could drive the ALU, memory, and register file appropriately.
+
+- A key part of the code that simplified how I went about this module was the ALU_control task, which translates opcode and function bits into specific ALU operations dynamically. This allowed the same ALU to handle addition, subtraction, logical, and shift operations through a 3 bit signal. 
+
+```bash
+ task ALU_control(
+      input   logic [6:0] op_code,
+      input   logic [2:0] funct_3,
+      input   logic       funct_7,
+      output  logic [3:0] ALU_control
+  );
+      begin
+          case (funct_3)
+              3'd0: if (op_code == 7'b0010011) ALU_control = 4'b0000;
+                    else   ALU_control = funct_7 ? 4'b0001 : 4'b0000; // add | addi (funct7 = 0) or sub (funct7 = 1)
+              3'd1: ALU_control = 4'b0101; // sll | slli
+              3'd2: ALU_control = 4'b1000; // slt | slti
+              3'd3: ALU_control = 4'b1001; // sltu | sltiu
+              3'd4: ALU_control = 4'b0100; // xor | xori
+              3'd5: ALU_control = funct_7 ? 4'b0110 : 4'b0111; // srl | slri (funct7 = 0) or sra | srai (funct7 = 1)
+              3'd6: ALU_control = 4'b0011; // or | ori
+              3'd7: ALU_control = 4'b0010; // and | andi
+              default: ALU_control = 4'b0000; // undefined
+          endcase
+      end
+  endtask
+```
+
+- A nuance I failed to catch on until much later, was the implications of making PCSrc 2 bits. Though it worked perfectly for sequential instructions, jumps, and branches, by selecting between PC+4, PC+Imm and ALUResult through a 4-to-1 mux in the fetch stage, there were still several problems when this was pipelined. 
+- Notice that the fetch stage runs ahead of execute, so the decision for PCSrc sometimes depends on ALU results (Zero, Negative) that haven’t been computed yet.
+#### Snippet from Control Unit
+
+```bash
+  output logic [1:0]  PCSrc,     //pc mux sel line; 0 = pc+4 ; 1 = pc+imm (branch,jal); 2 = aluresult (jalr) ; 3 = pc (stall)
+```
+
+#### Snippet from Fetch - Top
+
+```bash
+    mux4 PCMux(
+        .in0 (PCPlus4),
+        .in1 (PCTarget),
+        .in2 (ALUResult),
+        .in3 (PC),
+        .sel (PCSrc),
+        .out (PCNext)
+    );
+```
+
+## Sign Extension
+- Implements sign-extension of immediate values for instruction types (I, S, B, U, J).
+- Extracts relevant bits from the instruction and reformats them into 32-bit immediates suitable for ALU, branch, or memory operations.
+- Controlled by the ImmSrc signal from the control unit to select the correct immediate type.
+```bash
+  case (ImmSrc)
+  3'b000: ImmExt = {{20{instr[31]}}, instr[31:20]}; // I-type
+  3'b001: ImmExt = {{20{instr[31]}}, {instr[31:25], instr[11:7]}}; // S-type
+  3'b010: ImmExt = {{19{instr[31]}}, {instr[31], instr[7], instr[30:25], instr[11:8], 1'b0}}; // B-type
+  3'b011: ImmExt = {{11{instr[31]}}, {instr[31], instr[19:12], instr[20], instr[30:21], 1'b0}}; // J-type
+  3'b100: ImmExt = {instr[31:12], 12'b0}; // U-type
+endcase
+```
 
 
-Had to Change control to use jump and branch signals explicitly in pipeline and talk about it 
+## Instruction Memory
+- Stores program instructions and outputs a 32-bit instruction for a given address.
+- Supports sequential instruction fetch for the processor
+```bash
+instr = {rom_array[addr+3], rom_array[addr+2], rom_array[addr+1], rom_array[addr]};
+```
 
 
-A data hazard occurs when an instruction tries to read a register that has not yet been written back by a previous instruction. A control hazard occurs when the decision of what instruction to fetch next has not been made by the time the fetch takes place
+## Data Memory
+- Implements read/write memory for load and store instructions.
+- Supports word (lw/sw) and byte (lbu/sb) operations controlled by AddrMode.
+- Reads/writes are byte-addressable and aligned for little-endian storage.
+```bash
+// Word-aligned read
+RD = {ram_array[word_address+3], ram_array[word_address+2], ram_array[word_address+1], ram_array[word_address]};
+// Word/byte write
+if (MemWrite && AddrMode==0) ram_array[word_address +:4] <= RD2; 
+else if (MemWrite) ram_array[aluresult] <= RD2[7:0];
+```
 
-The hazard unit examines the instruction in the Execute stage. If it is lw and its destination register (rtE) matches either source operand of the instruction in the Decode stage (rsD or rtD), that instruction must be stalled in the Decode stage until the source operand is ready.
+# Pipelined
+
+Pipelining enables multiple instructions to be in-flight simultaneously, improving throughput compared to the single-cycle design. The pipelined implementation splits the CPU into 5 main stages:
+1. Fetch  
+2. Decode  
+3. Execute  
+4. Memory
+5. Writeback  
+
+## Pipeline Registers
+
+My pipelined CPU uses four pipeline registers, one between each stage—to hold intermediate values and control signals. These registers isolate stages, allowing multiple instructions to execute simultaneously without interfering with each other.
+
+### Fetch-Decode Register
+
+- Captures the fetched instruction and the current PC.
+
+- Provides stable inputs to the decode stage even while the fetch stage moves on.
+
+- Includes logic to flush on branch/jump and stall on hazards.
+
+Purpose: Keeps instruction flow correct despite branch delays or hazards.
+
+```bash
+always_ff @(posedge clk) begin
+    if (FlushD) begin
+        instrD <= 32'b0;
+        pcD    <= 32'b0;
+    end 
+    else if (!StallD) begin
+        instrD <= instrF;
+        pcD    <= pcF;
+    end
+end
+```
+
+- FlushD = 1: replace the instruction with a NOP — used for branch mispredicts or wrong-path instructions.
+- StallD = 1: freeze the IF/ID register — keep the old values when handling hazards.
+- Otherwise: load the next instruction normally from IF.
+- Priority: Flush > Stall > Normal operation.
+
+### Decode-Execute Register
+- It stores all control and data signals generated during the Decode stage and forwards them to the Execute stage on the next clock cycle. The module also supports flushing: when FlushE (necessary for Cache) is asserted, all control signals entering the Execute stage are cleared to prevent incorrect instruction execution (e.g., during branch mispredictions or hazards), while data signals continue to pass through unchanged.
+- Note: It is only the control signals that are stalled or flushed; the data signals are irrelevant. 
 
 
-"The instruction in the Decode stage is invalid. Replace it with a NOP.It will flow down the pipeline and do nothing."
-This is exactly what flushing means.
+### Execute-Memory Register
 
-❗ Why not simply disable control signals in later stages?
-Because the instruction in Decode hasn't been turned into control signals yet — it's still a raw instruction.Decode happens after this register.
+The execute_memory module forms the pipeline register between the Execute (E) and Memory (M) stages. It captures ALU results, write-data, and control signals generated in the Execute stage and forwards them to the Memory stage on the next clock edge. This ensures stable and synchronized data flow through the pipeline while preserving instruction ordering.
+```bash
+always_ff @(posedge clk) begin
+    ALUResultM <= ALUResultE;
+    WriteDataM <= WriteDataE;
+    PCPlus4M   <= PCPlus4E;
+
+    MemWriteM  <= MemWriteE;
+    RegWriteM  <= RegWriteE;
+    ResultSrcM <= ResultSrcE;
+    AddrModeM  <= AddrModeE;
+    RdM        <= RdE;
+end
+```
+
+### Memory-Writebacks Register
+
+The memory_writeback module passes values from the Memory (M) stage into the Writeback (W) stage. It stores control signals (such as RegWrite) and results from either memory or the ALU, along with the destination register. On every clock cycle, these values are latched and made available to the final stage, ensuring correct register file updates.
 
 
-Why MemRead is often omitted
-* The data memory is modeled so that reads happen whenever its address changes, without needing an enable; only writes are controlled by MemWrite. 
-* The control unit therefore only generates MemWrite (for stores) plus ResultSrc to choose between ALUResult, ReadData, and PC+4 in writeback. 
-When MemRead is useful
-* Some designs add MemRead mainly for the hazard detection unit: to detect a load‑use hazard, the unit checks if the instruction in EX/MEM is a load via MemRead and compares its rd with the next instruction’s rs1/rs2. 
-* If you encode “is a load” some other way (e.g., ResultSrcE == LOAD), you can avoid a separate MemRead signal and still implement the hazard unit correctly. 
+## Hazard Unit
 
+The hazard_unit module handles all data and control hazards in the pipelined processor. It ensures correct execution by detecting situations where an instruction depends on a value that has not yet been written back, and by forwarding or stalling the pipeline when needed.
+
+### Data Hazards
+
+A data hazard occurs when an instruction tries to read a register whose value is still being produced by an earlier instruction.
+To resolve this, the hazard unit implements two mechanisms:
+
+- Forwarding (bypassing):
+If the Execute-stage source registers (Rs1E or Rs2E) match a destination register in a later stage (MEM or WB), the corresponding value is forwarded directly to the ALU.
+
+    - 10 selects forwarded data from MEM
+
+    -  01 selects forwarded data from WB
+
+    - 00 uses the normal register file output
+
+- Load-use stall:
+A special case occurs when the instruction in the Execute stage is a load (ResultSrcE == 2'b01). Since the loaded data is not available until the Memory stage, forwarding cannot satisfy the dependency.
+If the Decode-stage instruction reads the same register as the load’s destination (RdE), the pipeline must stall for one cycle.
+This is expressed as:
+```bash
+if (ResultSrcE == 2'b01 && ((Rs1D == RdE) || (Rs2D == RdE)))
+    lwStall = 1;
+```
+
+### Control Hazards
+
+Control Hazards
+
+A control hazard occurs when the processor has not yet determined the next PC — for example, during branches.
+If the instruction in Decode depends on the result of an instruction still in Execute or Memory (such as a load feeding a branch comparison), the branch cannot yet make a correct decision. The hazard unit detects these cases and stalls the pipeline until the needed value is produced.
+
+Additionally, when a branch is taken (PCSrcE = 1), the Decode and Execute stages are flushed.
+Flushing means the instruction is replaced with a NOP — it flows down the pipeline but does nothing.
+
+- Stalling and Flushing Logic
+    - StallF / StallD pause the Fetch and Decode stages when a hazard is detected.
+    - FlushE clears the Execute-stage pipeline register when stalling or during a taken branch.
+    - FlushD clears the Decode-stage instruction only for taken branches.
+    - This ensures that invalid or partially decoded instructions are prevented from executing.
+```bash
+assign StallF = lwStall | branchStall;
+assign StallD = lwStall | branchStall;
+assign FlushE = lwStall | branchStall | PCSrcE;
+assign FlushD = PCSrcE;
+```
+
+## Testing
+
+
+# Takeaways
