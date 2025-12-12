@@ -232,10 +232,10 @@ module cache #(
                 cache[0][set][u] <= 1;
                 cache[1][set][u] <= 0;
                 cache[0][set][d] <= 1;
-                if (!AddrMode) begin
+                if (!AddrMode) begin //word
                     cache[0][set][(block_offset*32) +: 32] <= write_data;
                 end 
-                else begin
+                else begin //byte
                     cache[0][set][(block_offset*32)+(byte_offset*8) +: 8] <= write_data[7:0];
                 end
             end
