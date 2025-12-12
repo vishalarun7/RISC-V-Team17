@@ -40,6 +40,8 @@ module top #(
 
     logic StallF, StallD, FlushD, FlushE;
     logic [1:0] ForwardAE, ForwardBE;
+    logic StallF_hazard, StallD_hazard;
+    logic CacheStall;
 
     logic [DATA_WIDTH-1:0] a0_regfile;
 
@@ -50,6 +52,9 @@ module top #(
     logic [127:0]    mem_writedata;
     logic [127:0]   mem_readdata;
     logic           mem_ready;
+    logic           cache_req;
+
+    assign cache_req = ((ResultSrcM == 2'b01) || MemWriteM);
 
     fetch_top #(
     .WIDTH(DATA_WIDTH)
@@ -250,7 +255,7 @@ module top #(
         .MemWrite (MemWriteM),
         .AddrMode (AddrModeM),
         .read_data (ReadDataM),
-        .stall(StallF),
+        .stall(CacheStall),
         .mem_req (mem_req),
         .WriteEnable (WriteEnable),
         .memory_address (memory_address),
@@ -304,12 +309,14 @@ module top #(
     .PCSrcE(PCSrcE),
     .ForwardAE(ForwardAE),
     .ForwardBE(ForwardBE),
-    .StallD(StallD),
-    .StallF(StallF),
+    .StallD(StallD_hazard),
+    .StallF(StallF_hazard),
     .FlushE(FlushE),
     .FlushD(FlushD)
 );
 
+assign StallF = StallF_hazard | (CacheStall & cache_req);
+assign StallD = StallD_hazard | (CacheStall & cache_req);
 
 assign a0 = a0_regfile;
 
