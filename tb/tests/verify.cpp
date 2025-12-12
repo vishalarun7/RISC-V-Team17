@@ -73,7 +73,7 @@ TEST_F(CpuTestbench, F1)
 
         if (Verilated::gotFinish()) {
             vbdClose();
-            return;
+            EXPECT_EQ(top_->a0, 255);
         }
     }
 
