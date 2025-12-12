@@ -276,21 +276,21 @@ The waveforms and behaviour can be inspected via the generated traces and VBuddy
 Single-cycle verification image:  
 ![5 tests passed](images/pipelinetest.png)
 
-#### F1
+#### PDF: F1
+- Video: `tb/videos/singlecycle.mp4`
 
-- Video: `tb/videos/vbuddy_tests/F1_FSM.mp4`
 
 #### PDF: Gaussian
 
-- Video: `images/vbuddy_tests/PDF-Gaussian.mp4`
+- Video: `tb/videos/gauss.mp4`
 
 #### PDF: Noisy
 
-- Video: `images/vbuddy_tests/PDF-Noisy.mp4`
+- Video: `images/vbuddy_tests/noisy.mp4`
 
 #### PDF: Triangle
 
-- Video: `images/vbuddy_tests/PDF-Triangle.mp4`
+- Video: `images/vbuddy_tests/triangle.mp4`
 
 ---
 
