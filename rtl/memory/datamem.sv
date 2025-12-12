@@ -2,15 +2,6 @@ module datamem #(
     parameter WIDTH = 32
 )(
     input clk,
-
-    input logic            mem_req,
-    input logic            WriteEnable,
-    input logic [31:0]     memory_address,
-    input logic [127:0]    mem_writedata,
-    output logic [127:0]   mem_readdata,
-    output logic           mem_ready
-    input clk,
-
     input logic            mem_req,
     input logic            WriteEnable,
     input logic [31:0]     memory_address,
