@@ -5,7 +5,6 @@ main:
     LI a0, 0
     LI a1, 0
     LI s1, 8
-
 _loop:
     BGE a1, s1, finish
     JAL t1, incr
