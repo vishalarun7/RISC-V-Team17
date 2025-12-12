@@ -1,19 +1,14 @@
 # RISC-V-Team17
 
 RISC-V 32I CPU designed as part of the Instruction Architectures and Compilers class.
-Group Members: 
-Vishal Arun (Repo Master)
-Raphael Sinai 
-Nikhil Sarathkumar 
-Emir Alemdar
 
 ---
 ## Personal Statements
 
-- [Vishal](#quick-start)
-- [Raph](#single-cycle)
-- [Nikhil](#pipelined)
-- [Emir](#cache)
+- [Vishal](statements/Vishal.md)
+- [Raph](statements/Raph.md)
+- [Nikhil](statements/Nikhil.word)
+- [Emir]()
 
 ---
 ## Table of Contents
@@ -27,14 +22,13 @@ Emir Alemdar
 
 ## Quick Start
 
-We completed the Single-Cycle CPU and two stretch goals (Pipelined CPU and Two-Way Set Associative Write-Back Cache).  
-These are organised into the following branches:
+We completed the Single-Cycle CPU and two stretch goals (Pipelined CPU and 2 way Set Associative Cache with Pipeline).  These are organised into the following branches:
 
 | Branch    | Description                                   |
 |----------|-----------------------------------------------|
 | `main`   | Single-Cycle Implementation                   |
-| `pipelined` | Pipelined Implementation (+ full RV32I)   |
-| `cache`  | Cache + Single-Cycle Implementation           |
+| `pipelined` | Pipelined Implementation   |
+| `cache`  | Cache + Pipelined Implementation           |
 
 To access each version:
 
@@ -51,12 +45,17 @@ git checkout <branch-name>
 
 To run the provided tests in the selected branch:
 ```bash
- cd ./tb
+cd ./tb
 doit.sh tests/verify.cpp
 ```
 
 
 ### Contributions
+
+Our contributions to the assignement are summarized in the table below. 
+- Legend:  
+  - **X** = Lead contributor  
+  - **\*** = Partial contributor 
 
 | Category         | Module                            | Vishal | Nikhil | Emir | Raph |
 |------------------|-----------------------------------|:------:|:------:|:----:|:----:|
@@ -84,18 +83,20 @@ doit.sh tests/verify.cpp
 |                  | **F1 Assembly.s**                 |        |        |      |  X   |
 | **Other**        | **Vbuddy**                        |        |        |      |  X   |
 
-Legend:  
-- **X** = Lead contributor  
-- **\*** = Partial contributor  
+ 
+
 
 ---
 
+----
 ## Single Cycle
 
 ### Overview
 
 The single-cycle implementation supports the core RV32I subset, including:  
 R-type, I-type (immediate), `lbu`, `sb`, `beq`, `bne`, `jal`, `jalr`, and `lui`.
+
+![Single Cycle MIPS Processor](images/Single.png)
 
 ### File Structure
 
@@ -137,35 +138,31 @@ For the provided assembly tests:
 The waveforms and behaviour can be inspected via the generated traces and VBuddy outputs.
 
 Single-cycle verification image:  
-`images/single-cycle-tests.png`
+![5 tests passed](images/pipelinetest.png)
 
 #### F1
 
-- GIF: `images/vbuddy_tests/F1.gif`  
 - Video: `images/vbuddy_tests/F1_FSM.mp4`
 
 #### PDF: Gaussian
 
-- GIF: `images/vbuddy_tests/PDF-Gaussian.gif`  
 - Video: `images/vbuddy_tests/PDF-Gaussian.mp4`
 
 #### PDF: Noisy
 
-- GIF: `images/vbuddy_tests/PDF-Noisy.gif`  
 - Video: `images/vbuddy_tests/PDF-Noisy.mp4`
 
 #### PDF: Triangle
 
-- GIF: `images/vbuddy_tests/PDF-Triangle.gif`  
 - Video: `images/vbuddy_tests/PDF-Triangle.mp4`
-
-If any embedded videos fail to load, open them directly from `./images/vbuddy_tests/`.
 
 ---
 
 ## Pipelined
 
 ### Overview
+
+![Diagram](images/harris.png)
 
 The pipelined implementation supports the full RV32I instruction set.  
 The CPU is split into four main stages:
@@ -265,6 +262,7 @@ Testing follows the same `tb` infrastructure and `doit.sh` flow as in the single
 ---
 
 ## Cache
+![Diagram](images/cache.png)
 
 ### Overview
 
@@ -330,8 +328,31 @@ It uses a two-way set-associative, write-back cache to reduce effective memory l
 
 ## Implementation
 
+Pipeline: 5 stages – IF, ID, EX, MEM, WB
 
+### Stage Integration
+
+- IF: Access instruction cache.
+  -  Hit → fetch instruction.
+  -  Miss → stall until memory fetch.
+
+- EX: Compute memory addresses.
+
+- MEM: Access data cache:
+
+  - Load: Hit → read data, Miss → fetch block from memory, update cache, then continue.
+
+  - Store: Hit → write to cache (and memory if write-through), Miss → write-allocate or write around.
+
+- WB: Write data to register after MEM stage.
+
+- Cache Miss Handling
+
+  - Stall IF, ID, EX stages while MEM fetches from memory.
+
+  - Resume pipeline once block arrives.
 
 
 ## Testing
+
 
