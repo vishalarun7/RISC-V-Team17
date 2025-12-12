@@ -241,4 +241,28 @@ To make sure that all of the branches work I added the following tests to keep t
 
 ### Final mass testing
 
-Now that crucial tests are working as intended
+Now that crucial tests are working as intended. I focused on adding many tests to make sure all of the instructions implemented are working as intended.
+
+For each type of instruction, there is a folder with multiple tests within the group of instructions. For this group of instructions, I also added a .cpp file to run all these tests.
+
+To make my life easier, I modified `doit.sh` a bit to always use `top` instead of only when running `verify.cpp`
+
+The following tests were added:
+
+- Branch:
+    - beq_equal.s
+    - beq_negative.s
+    - beq_not_equal.s
+    - beq_zero.s
+    - bge_equal.s
+    - bge_greater.s
+    - bge_less.s
+    - bgeu_greater.s
+    - bgeu_unsigned.s
+    - blt_less.s
+    - blt_greater.s
+    - blt_negative.s
+    - bltu_less.s
+    - bltu_unsigned.s
+    - bne_not_equal.s
+    - bne_equal.s
