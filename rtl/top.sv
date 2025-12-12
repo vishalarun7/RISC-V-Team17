@@ -47,18 +47,22 @@ module top #(
 
     logic [DATA_WIDTH-1:0] a0_regfile;
 
+    // cache <-> memory signals
     logic            mem_req;
     logic            WriteEnable;
     logic [31:0]     memory_address;
     logic [127:0]    mem_writedata;
-    logic [127:0]   mem_readdata;
-    logic           mem_ready;
-    logic           cache_req;
+    logic [127:0]    mem_readdata;
+    logic            mem_ready;
 
-    assign cache_req = ((ResultSrcM == 2'b01) || MemWriteM);
 
+    logic            cache_req;    
+
+    assign cache_req = ((ResultSrcM == 2'b01) || MemWriteM); 
+
+    // FETCH
     fetch_top #(
-    .WIDTH(DATA_WIDTH)
+        .WIDTH(DATA_WIDTH)
     ) fetch_stage (
         .clk      (clk),
         .rst      (rst),
@@ -67,124 +71,126 @@ module top #(
         .PCTarget (PCTargetE),
         .instr    (instrF),
         .PCPlus4  (PCPlus4F),
-        .PC         (PCF)
+        .PC       (PCF)
     );
 
-
+    // IF/ID
     fetch_decode #(
         .DATA_WIDTH(DATA_WIDTH)
     ) fd_reg (
-        .clk(clk),
-        .FlushD(FlushD),
-        .StallD(StallD),
-        .PCPlus4F(PCPlus4F),
-        .instr(instrF),
-        .pcF(PCF),
-        .PCPlus4D(PCPlus4D),
-        .instrD(instrD),
-        .pcD(PCD)
+        .clk      (clk),
+        .FlushD   (FlushD),
+        .StallD   (StallD),
+        .PCPlus4F (PCPlus4F),
+        .instr    (instrF),
+        .pcF      (PCF),
+        .PCPlus4D (PCPlus4D),
+        .instrD   (instrD),
+        .pcD      (PCD)
     );
 
     assign Rs1D = instrD[19:15];
     assign Rs2D = instrD[24:20];
-    assign RdD = instrD[11:7];
+    assign RdD  = instrD[11:7];
 
     control control_unit(
-        .op(instrD[6:0]),
-        .funct3(instrD[14:12]),
-        .funct7(instrD[30]),
-        .RegWrite(RegWriteD),
-        .MemWrite(MemWriteD),
-        .ALUSrc(ALUSrcD),
-        .ResultSrc(ResultSrcD),
-        .Branch(BranchD),
-        .Jump(JumpD),
-        .ImmSrc(ImmSrcD),
+        .op        (instrD[6:0]),
+        .funct3    (instrD[14:12]),
+        .funct7    (instrD[30]),
+        .RegWrite  (RegWriteD),
+        .MemWrite  (MemWriteD),
+        .ALUSrc    (ALUSrcD),
+        .ResultSrc (ResultSrcD),
+        .Branch    (BranchD),
+        .Jump      (JumpD),
+        .ImmSrc    (ImmSrcD),
         .ALUControl(ALUControlD),
-        .AddrMode(AddrModeD),
-        .funct3Out(funct3D)
+        .AddrMode  (AddrModeD),
+        .funct3Out (funct3D)
     );
 
     regfile regfile_inst (
-        .clk(clk),
-        .AD1(Rs1D),
-        .AD2(Rs2D),
-        .AD3(RdW),
-        .WE3(RegWriteW),
-        .WD3(ResultW),
-        .RD1(RD1D),
-        .RD2(RD2D),
-        .a0(a0_regfile)
+        .clk (clk),
+        .AD1 (Rs1D),
+        .AD2 (Rs2D),
+        .AD3 (RdW),
+        .WE3 (RegWriteW),
+        .WD3 (ResultW),
+        .RD1 (RD1D),
+        .RD2 (RD2D),
+        .a0  (a0_regfile)
     );
 
     immext immext_inst (
-        .instr(instrD),
-        .ImmSrc(ImmSrcD),
-        .ImmExt(ImmExtD)
+        .instr  (instrD),
+        .ImmSrc (ImmSrcD),
+        .ImmExt (ImmExtD)
     );
 
+    // ID/EX
     decode_execute #(
         .DATA_WIDTH(DATA_WIDTH)
     ) de_reg (
-        .clk(clk),
-        .FlushE(FlushE),
-        .AddrModeD(AddrModeD),
-        .RegWriteD(RegWriteD),
-        .MemWriteD(MemWriteD),
-        .JumpD(JumpD),
-        .BranchD(BranchD),
-        .ALUSrcD(ALUSrcD),
-        .ResultSrcD(ResultSrcD),
+        .clk        (clk),
+        .FlushE     (FlushE),
+        .AddrModeD  (AddrModeD),
+        .RegWriteD  (RegWriteD),
+        .MemWriteD  (MemWriteD),
+        .JumpD      (JumpD),
+        .BranchD    (BranchD),
+        .ALUSrcD    (ALUSrcD),
+        .ResultSrcD (ResultSrcD),
         .ALUControlD(ALUControlD),
-        .funct3D(funct3D),
-        .StallE(StallD),
-        .Rs1D(Rs1D),
-        .Rs2D(Rs2D),
-        .RdD(RdD),
-        .RD1D(RD1D),
-        .RD2D(RD2D),
-        .pcD(PCD),
-        .PCPlus4D(PCPlus4D),
-        .ImmExtD(ImmExtD),
-        .AddrModeE(AddrModeE),
-        .RegWriteE(RegWriteE),
-        .MemWriteE(MemWriteE),
-        .JumpE(JumpE),
-        .BranchE(BranchE),
-        .ALUSrcE(ALUSrcE),
-        .ResultSrcE(ResultSrcE),
+        .funct3D    (funct3D),
+        .StallE     (StallD),  
+        .Rs1D       (Rs1D),
+        .Rs2D       (Rs2D),
+        .RdD        (RdD),
+        .RD1D       (RD1D),
+        .RD2D       (RD2D),
+        .pcD        (PCD),
+        .PCPlus4D   (PCPlus4D),
+        .ImmExtD    (ImmExtD),
+        .AddrModeE  (AddrModeE),
+        .RegWriteE  (RegWriteE),
+        .MemWriteE  (MemWriteE),
+        .JumpE      (JumpE),
+        .BranchE    (BranchE),
+        .ALUSrcE    (ALUSrcE),
+        .ResultSrcE (ResultSrcE),
         .ALUControlE(ALUControlE),
-        .funct3E(funct3E),
-        .Rs1E(Rs1E),
-        .Rs2E(Rs2E),
-        .RdE(RdE),
-        .RD1E(RD1E),
-        .RD2E(RD2E),
-        .pcE(PCE),
-        .PCPlus4E(PCPlus4E),
-        .ImmExtE(ImmExtE)
+        .funct3E    (funct3E),
+        .Rs1E       (Rs1E),
+        .Rs2E       (Rs2E),
+        .RdE        (RdE),
+        .RD1E       (RD1E),
+        .RD2E       (RD2E),
+        .pcE        (PCE),
+        .PCPlus4E   (PCPlus4E),
+        .ImmExtE    (ImmExtE)
     );
 
     assign PCTargetE = ALUSrcE ? ALUResultE : (PCE + ImmExtE);
-    
-    // Branch condition logic based on funct3
+
+    // Branch condition
     logic BranchCondE;
     always_comb begin
         case (funct3E)
-            3'b000: BranchCondE = ZeroE;              // beq: branch if equal
-            3'b001: BranchCondE = ~ZeroE;             // bne: branch if not equal
-            3'b100: BranchCondE = ALUResultE[0];      // blt: branch if less than (signed)
-            3'b101: BranchCondE = ~ALUResultE[0];     // bge: branch if greater or equal (signed)
-            3'b110: BranchCondE = ALUResultE[0];      // bltu: branch if less than (unsigned)
-            3'b111: BranchCondE = ~ALUResultE[0];     // bgeu: branch if greater or equal (unsigned)
+            3'b000: BranchCondE = ZeroE;
+            3'b001: BranchCondE = ~ZeroE;
+            3'b100: BranchCondE = ALUResultE[0];
+            3'b101: BranchCondE = ~ALUResultE[0];
+            3'b110: BranchCondE = ALUResultE[0];
+            3'b111: BranchCondE = ~ALUResultE[0];
             default: BranchCondE = 1'b0;
         endcase
     end
-    
+
     logic BranchTakenE;
     assign BranchTakenE = BranchE & BranchCondE;
-    assign PCSrcE = BranchTakenE | JumpE;
+    assign PCSrcE       = BranchTakenE | JumpE;
 
+    // Forwarding muxes
     always_comb begin
         case (ForwardAE)
             2'b00: SrcAE = RD1E;
@@ -200,102 +206,109 @@ module top #(
             default: WriteDataE = RD2E;
         endcase
     end
-    
+
     assign SrcBE = ALUSrcE ? ImmExtE : WriteDataE;
 
     alu #(.DATA_WIDTH(DATA_WIDTH)) 
     alu_inst (
-    .SrcA(SrcAE),
-    .SrcB(SrcBE),
-    .ALUControl(ALUControlE),
-    .ALUResult(ALUResultE),
-    .Zero(ZeroE)
+        .SrcA      (SrcAE),
+        .SrcB      (SrcBE),
+        .ALUControl(ALUControlE),
+        .ALUResult (ALUResultE),
+        .Zero      (ZeroE)
     );
 
+    // EX/MEM
     execute_memory #(
         .DATA_WIDTH(DATA_WIDTH)
     ) em_reg (
-        .clk(clk),
-        .RegWriteE(RegWriteE),
-        .MemWriteE(MemWriteE),
-        .ResultSrcE(ResultSrcE),
-        .RdE(RdE),
-        .PCPlus4E(PCPlus4E),
-        .ALUResultE(ALUResultE),
-        .WriteDataE(WriteDataE),
-        .AddrModeE(AddrModeE),
-        .ImmExtE(ImmExtE),
-        .RegWriteM(RegWriteM),
-        .MemWriteM(MemWriteM),
-        .ResultSrcM(ResultSrcM),
-        .RdM(RdM),
-        .ALUResultM(ALUResultM),
-        .WriteDataM(WriteDataM),
-        .PCPlus4M(PCPlus4M),
-        .AddrModeM(AddrModeM),
-        .ImmExtM(ImmExtM)
+        .clk        (clk),
+        .RegWriteE  (RegWriteE),
+        .MemWriteE  (MemWriteE),
+        .ResultSrcE (ResultSrcE),
+        .RdE        (RdE),
+        .PCPlus4E   (PCPlus4E),
+        .ALUResultE (ALUResultE),
+        .WriteDataE (WriteDataE),
+        .AddrModeE  (AddrModeE),
+        .ImmExtE    (ImmExtE),
+
+
+        .StallM     (CacheStall),   
+
+        .RegWriteM  (RegWriteM),
+        .MemWriteM  (MemWriteM),
+        .ResultSrcM (ResultSrcM),
+        .RdM        (RdM),
+        .ALUResultM (ALUResultM),
+        .WriteDataM (WriteDataM),
+        .PCPlus4M   (PCPlus4M),
+        .AddrModeM  (AddrModeM),
+        .ImmExtM    (ImmExtM)
     );
 
-     datamem #(.WIDTH(DATA_WIDTH)) datamem_inst (
-        .clk(clk),
-        .mem_req (mem_req),
-        .WriteEnable (WriteEnable),
-        .memory_address (memory_address),
+    // Data memory (backing store for cache)
+    datamem #(.WIDTH(DATA_WIDTH)) datamem_inst (
+        .clk           (clk),
+        .mem_req       (mem_req),
+        .WriteEnable   (WriteEnable),
+        .memory_address(memory_address),
         .mem_writedata (mem_writedata),
-        .mem_readdata (mem_readdata),
-        .mem_ready (mem_ready)
+        .mem_readdata  (mem_readdata),
+        .mem_ready     (mem_ready)
     );
 
 
-
-    assign cache_req = ((ResultSrcM == 2'b01) || MemWriteM);
-
-    
     logic [DATA_WIDTH-1:0] data_address;
     logic [DATA_WIDTH-1:0] write_data;
-    logic MemWrite;
-    logic AddrMode;
+    logic                  MemWrite_cache;  
+    logic                  AddrMode_cache;  
 
-    assign data_address = ALUResultM & {DATA_WIDTH{cache_req}};
-    assign write_data   = WriteDataM & {DATA_WIDTH{cache_req}};
-    
+    assign data_address   = ALUResultM  & {DATA_WIDTH{cache_req}};
+    assign write_data     = WriteDataM  & {DATA_WIDTH{cache_req}};
+    assign MemWrite_cache = MemWriteM   & cache_req; 
+    assign AddrMode_cache = AddrModeM;               
+
     cache cache_inst (
-        .clk (clk),
-        .rst (rst),
-        .data_address (data_address),
-        .write_data (write_data),
-        .MemWrite (MemWrite),
-        .AddrMode (AddrMode),
-        .read_data (ReadDataM),
-        .stall(CacheStall),
-        .mem_req (mem_req),
-        .WriteEnable (WriteEnable),
-        .memory_address (memory_address),
+        .clk           (clk),
+        .rst           (rst),
+        .data_address  (data_address),
+        .write_data    (write_data),
+        .MemWrite      (MemWrite_cache), 
+        .AddrMode      (AddrMode_cache), 
+        .read_data     (ReadDataM),
+        .cache_req     (cache_req),
+        .stall         (CacheStall),
+        .mem_req       (mem_req),
+        .WriteEnable   (WriteEnable),
+        .memory_address(memory_address),
         .mem_writedata (mem_writedata),
-        .mem_readdata (mem_readdata),
-        .mem_ready (mem_ready)
+        .mem_readdata  (mem_readdata),
+        .mem_ready     (mem_ready)
     );
 
+    // MEM/WB
     memory_writeback #(
         .DATA_WIDTH(DATA_WIDTH)
     ) mw_reg (
-        .clk(clk),
-        .RegWriteM(RegWriteM),
-        .ResultSrcM(ResultSrcM),
-        .RdM(RdM),
-        .ALUResultM(ALUResultM),
-        .ReadDataM(ReadDataM),
-        .PCPlus4M(PCPlus4M),
-        .ImmExtM(ImmExtM),
-        .RegWriteW(RegWriteW),
-        .ResultSrcW(ResultSrcW),
-        .RdW(RdW),
-        .ALUResultW(ALUResultW),
-        .ReadDataW(ReadDataW),
-        .PCPlus4W(PCPlus4W),
-        .ImmExtW(ImmExtW)
+        .clk        (clk),
+        .RegWriteM  (RegWriteM),
+        .ResultSrcM (ResultSrcM),
+        .RdM        (RdM),
+        .ALUResultM (ALUResultM),
+        .ReadDataM  (ReadDataM),
+        .PCPlus4M   (PCPlus4M),
+        .ImmExtM    (ImmExtM),
+        .RegWriteW  (RegWriteW),
+        .ResultSrcW (ResultSrcW),
+        .RdW        (RdW),
+        .ALUResultW (ALUResultW),
+        .ReadDataW  (ReadDataW),
+        .PCPlus4W   (PCPlus4W),
+        .ImmExtW    (ImmExtW)
     );
 
+    // WB mux
     always_comb begin
         case (ResultSrcW)
             2'b00: ResultW = ALUResultW;
@@ -306,33 +319,34 @@ module top #(
         endcase
     end
 
-
+    // Hazard unit
     hazard_unit hazard (
-    .Rs1E(Rs1E),
-    .Rs2E(Rs2E),
-    .RdE(RdE),
-    .Rs1D(Rs1D),
-    .Rs2D(Rs2D),
-    .RegWriteM(RegWriteM),
-    .RegWriteW(RegWriteW),
-    .RegWriteE(RegWriteE),
-    .RdM(RdM),
-    .RdW(RdW),
-    .ResultSrcE(ResultSrcE),
-    .ResultSrcM(ResultSrcM),
-    .BranchD(BranchD),
-    .PCSrcE(PCSrcE),
-    .ForwardAE(ForwardAE),
-    .ForwardBE(ForwardBE),
-    .StallD(StallD_hazard),
-    .StallF(StallF_hazard),
-    .FlushE(FlushE),
-    .FlushD(FlushD)
-);
+        .Rs1E       (Rs1E),
+        .Rs2E       (Rs2E),
+        .RdE        (RdE),
+        .Rs1D       (Rs1D),
+        .Rs2D       (Rs2D),
+        .RegWriteM  (RegWriteM),
+        .RegWriteW  (RegWriteW),
+        .RegWriteE  (RegWriteE),
+        .RdM        (RdM),
+        .RdW        (RdW),
+        .ResultSrcE (ResultSrcE),
+        .ResultSrcM (ResultSrcM),
+        .BranchD    (BranchD),
+        .PCSrcE     (PCSrcE),
+        .ForwardAE  (ForwardAE),
+        .ForwardBE  (ForwardBE),
+        .StallD     (StallD_hazard),
+        .StallF     (StallF_hazard),
+        .FlushE     (FlushE),
+        .FlushD     (FlushD)
+    );
 
-assign StallF = StallF_hazard | CacheStall;
-assign StallD = StallD_hazard | CacheStall;
 
-assign a0 = a0_regfile;
+    assign StallF = StallF_hazard | CacheStall;
+    assign StallD = StallD_hazard | CacheStall;
+
+    assign a0 = a0_regfile;
 
 endmodule

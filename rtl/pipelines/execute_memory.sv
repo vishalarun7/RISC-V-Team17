@@ -12,6 +12,7 @@ module execute_memory#(
     input logic [DATA_WIDTH-1:0] WriteDataE,
     input logic AddrModeE,
     input logic [DATA_WIDTH-1:0] ImmExtE,
+    input logic StallM,
 
     output logic RegWriteM,
     output logic MemWriteM, 
@@ -25,6 +26,7 @@ module execute_memory#(
 );
     
 always_ff @(posedge clk) begin
+    if (!StallM) begin
         ALUResultM <= ALUResultE;            
         WriteDataM <= WriteDataE;            
         PCPlus4M <= PCPlus4E;                      
@@ -34,6 +36,7 @@ always_ff @(posedge clk) begin
         ResultSrcM <= ResultSrcE;
         AddrModeM <= AddrModeE;
         ImmExtM <= ImmExtE;
+    end
     end
  
 endmodule

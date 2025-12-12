@@ -19,6 +19,7 @@ module cache #(
     input logic             AddrMode, // 1 byte, 0 word
     output logic [31:0]     read_data,
     output logic            stall,
+    input logic             cache_req,
 
     //cache-memory
     output logic            mem_req,
@@ -82,7 +83,6 @@ module cache #(
         case (state)
             IDLE: begin
                 if (!hit) begin
-                    stall = 1;
                     if (dirty) begin
                         next_state = WRITE_BACK;
                     end 
@@ -117,7 +117,7 @@ module cache #(
             IDLE: begin
                 mem_req = 0;
                 WriteEnable = 0;
-                stall = 0;
+                stall = !hit && cache_req;
             end
 
             WRITE_BACK: begin
@@ -192,6 +192,14 @@ module cache #(
         
         dirty = victim ? d1 : d0;
 
+        if (hit && !MemWrite) begin //load
+            if (AddrMode) begin  // Byte load
+                read_data = {24'b0, data_out[(byte_offset*8) +: 8]};
+            end else begin  // Word load
+                read_data = data_out;
+            end
+        end
+
     end
 
     logic victim_reg;
@@ -208,15 +216,12 @@ module cache #(
             end
         end
         else begin
+            if (cache_req) begin
             state <= next_state;
+            end
         end
 
-        if (hit && !MemWrite) begin //load
-            if (AddrMode) begin  // Byte load
-                read_data <= {24'b0, data_out[(byte_offset*8) +: 8]};
-            end else begin  // Word load
-                read_data <= data_out;
-            end
+        if (hit && !MemWrite) begin
             if (hit0) begin
                 cache[0][set][u] <= 1;
                 cache[1][set][u] <= 0;
@@ -269,14 +274,6 @@ module cache #(
                 else begin
                     cache[victim_reg][set][(block_offset*32)+(byte_offset*8) +: 8] <= write_data[7:0];
                 end                
-            end
-            else begin  // Load miss - need to read the data we just fetched
-                if (AddrMode) begin  // Byte load
-                    read_data <= {24'b0, mem_readdata[(block_offset*32)+(byte_offset*8) +: 8]};
-                end
-                else begin  // Word load
-                    read_data <= mem_readdata[(block_offset*32) +: 32];
-                end
             end
         end
     end
