@@ -9,7 +9,7 @@ Overview
 
 
 
-##Single Cycle 
+## Single Cycle 
 Instruction Memory
 
 Sign Extension Unit
@@ -20,7 +20,7 @@ Data Memory
 
 
 
-##Pipelined
+## Pipelined
 
 Code that could not be carried forward from my Single-Cycle design
 
