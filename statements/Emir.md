@@ -1,6 +1,9 @@
-Full name: Emir Alemdar
+# Details
 
+Full name: Emir Alemdar
 CID: 02616887
+
+# Summary of What I did in this preoject
 
 Hi, my name is Emir. I worked on the ALU and the program counter part of the project.
 I've implemented the multiplexers that are needed for the program counter of the RISC-V CPU to work properly. 
