@@ -1,4 +1,5 @@
 Full name: Emir Alemdar
+
 CID: 02616887
 
 Hi, my name is Emir. I worked on the ALU and the program counter part of the project.
