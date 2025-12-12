@@ -119,6 +119,15 @@ TEST_F(CpuTestbench, F1)
 
 This code uses the functions provided in `cpu_testbench.h` and `vbuddy.cpp` to display `a0` on the Vbuddy screen and LED bar. The test is setup using `setupTest("f1")` and initialised with `initSimulation()`, we then focus on the Vbuddy initialising what we want to see. Instead of running for `CYCLES` we have a loop where we run one cycle and update the Vbuddy's outputs with `top_->a0`. If the simulation ends, we tell gtest to expect `a0` to be `0xFF`.
 
+### PDF
+
+I implemented the visualisation of the various PDF functions with the videos below, as a0 isn't consistently the output and gets changes, the line isn't straight but trends to what is meant to be seen
+
+- [GAUSS](https://github.com/vishalarun7/RISC-V-Team17/blob/main/tb/videos/gauss.mp4)
+- [NOISY](https://github.com/vishalarun7/RISC-V-Team17/blob/main/tb/videos/noisy.mp4)
+- [TRIANGLE](https://github.com/vishalarun7/RISC-V-Team17/blob/main/tb/videos/triangle.mp4)
+
+
 ## Debugging for pipeline
 
 > The following can be found on the pipelined branch
