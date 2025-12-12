@@ -224,6 +224,37 @@ assign FlushD = PCSrcE;
 ```
 
 ## Testing
+![All 5 Tests passed](RISC-V-Team17/images/Screenshot 2025-12-12 at 6.18.42 PM.png)
 
+During testing, the most significant issue encountered was related to the LUI (Load Upper Immediate) instruction. In RISC-V, lui loads a 20-bit immediate into the upper bits of a register, and it is also used internally when assembling large constants — for example, the li pseudo-instruction often expands into a combination of LUI + ADDI.
+
+Initially, the control logic incorrectly assigned:
+```bash
+ResultSrc = 2'b11   // assuming a 4-input mux for writeback
+```
+
+
+This caused certain li instructions to fail because the LUI value was not being written back correctly. The proper behavior for lui is simply to write the extended immediate directly to the register file, so the correct control configuration is:
+```bash
+// U-type (lui)
+7'b0110111: begin 
+    RegWrite   = 1'b1;
+    ImmSrc     = 3'b100;
+    MemWrite   = 1'b0;
+    ResultSrc  = 2'b00; // FIXED: write immediate result directly
+    Jump       = 1'b0;
+    Branch     = 1'b0;
+    ALUSrc     = 1'b1;
+    ALUControl = 4'b0000;
+end
+```
+Identifying and resolving this bug took several days of debugging.
 
 # Takeaways
+This project was one of the most challenging and rewarding technical experiences I have worked on. Building a pipelined RISC-V processor from scratch required me to develop a much deeper understanding of CPU architecture, including instruction formats, control-path design, ALU operations, forwarding logic, hazard detection, and how each part of the pipeline interacts with the next. I especially gained confidence in debugging complex timing and control issues, such as the 2 days spent on the LUI/LI bug. These experiences taught me how subtle design decisions can propagate through the entire pipeline and how important systematic debugging is in hardware design.
+
+Beyond the technical side, I also learned a lot about communication and teamwork. Although our group was larger, only three of us were consistently and actively contributing to the project. This made the workload heavier for those involved, but it also taught me how to coordinate tasks more effectively, share progress clearly, and maintain a collaborative mindset even when participation levels varied. I learned how important it is to communicate early, divide responsibilities realistically, and support each other through the more difficult debugging stages—all of which ultimately made the project stronger.
+
+Overall, this project substantially broadened my understanding of RISC-V, pipelines, and computer architecture as a whole. It has also made me excited to take the next step: building a compiler that targets our processor design. If we had more time, I would have loved to explore superscalar or dual-issue extensions, as the idea of scaling this design into a more parallel, higher-performance architecture is something that now feels within reach.
+
+
