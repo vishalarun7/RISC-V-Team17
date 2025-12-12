@@ -46,7 +46,6 @@ module top #(
     logic [DATA_WIDTH-1:0] a0_regfile;
 
     logic            mem_req;
-    logic           cache_req;
     logic            WriteEnable;
     logic [31:0]     memory_address;
     logic [127:0]    mem_writedata;
