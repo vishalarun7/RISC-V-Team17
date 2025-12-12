@@ -117,8 +117,88 @@ This code uses the functions provided in `cpu_testbench.h` and `vbuddy.cpp` to d
 
 ## Debugging for pipeline
 
-Ensuring that the pipelined CPU worked was much trickier than the single cycle CPU.
+Ensuring that the pipelined CPU worked was much trickier than the single cycle CPU. For each of these changes, an extensive use of gtkwave was very helpful to visualise which instruction was failing.
 
 ### Inital testing
 
 To begin with, the required tests 1 3 and 4 were failing.
+
+The first problem was that J-type and U-type instructions were reversed, simple fix just had to change
+
+```diff
+- RegWrite = 1'b1; ImmSrc = 3'b100; MemWrite = 1'b0; ResultSrc = 2'b10; PCSrc = 2'b01;
++ RegWrite = 1'b1; ImmSrc = 3'b011; MemWrite = 1'b0; ResultSrc = 2'b10; PCSrc = 2'b01;
+```
+for J-type (JAL test)
+
+and
+
+```diff
+- RegWrite = 1'b1; ImmSrc = 3'b011; MemWrite = 1'b0; ResultSrc = 2'b11; PCSrc = 2'b00;
++ RegWrite = 1'b1; ImmSrc = 3'b100; MemWrite = 1'b0; ResultSrc = 2'b11; PCSrc = 2'b00;
+```
+
+for U-type (LUI test)
+
+In a similar fashion, the result src was incorrect for these functions, it wasn't seperating alu result immex and pcplus4 correctly.
+
+```sv
+2'b10: Result = PCPlus4;        // PC+4 (for JAL/JALR)
+2'b11: Result = ImmExt;         // Immediate (for LUI)
+```
+
+### JAL broken
+
+In the execute stage, the `PCTarget` was always being set to `PC + ImmExt' which is incorrect as for these instructions, the target needs to be the result of the ALU.
+So the following change was made:
+
+```diff
+- assign PCTargetE = PCE + ImmExtE;
++ assign PCTargetE = ALUSrcE ? ALUResultE : (PCE + ImmExtE);
+```
+
+This mux allows us to use the ALU result instead of `PC + ImmExt` when required.
+
+Side note: this commit also adds this line so the output is correct
+```diff
++ assign a0 = a0_regfile;
+```
+
+### Major fix: BNE not working
+
+This fix required much more thinking although the solution was much simpler than expected.
+
+Initially, the `BranchTaken` logic was using the `Zero` flag which is incorrect. This required the addition of a combination logic block based on funct3  as so:
+
+```sv
+    logic BranchCondE;
+    always_comb begin
+        case (funct3E)
+            3'b000: BranchCondE = ZeroE;              // beq: branch if equal
+            3'b001: BranchCondE = ~ZeroE;             // bne: branch if not equal
+            3'b100: BranchCondE = ALUResultE[0];      // blt: branch if less than (signed)
+            3'b101: BranchCondE = ~ALUResultE[0];     // bge: branch if greater or equal (signed)
+            3'b110: BranchCondE = ALUResultE[0];      // bltu: branch if less than (unsigned)
+            3'b111: BranchCondE = ~ALUResultE[0];     // bgeu: branch if greater or equal (unsigned)
+            default: BranchCondE = 1'b0;
+        endcase
+    end
+```
+
+This change was implemented in [top.sv](https://github.com/vishalarun7/RISC-V-Team17/blob/pipelined/rtl/top.sv) which required me to route all the necessary wires through [hazard_unit.sv](https://github.com/vishalarun7/RISC-V-Team17/blob/pipelined/rtl/hazard_unit.sv), [control.sv](https://github.com/vishalarun7/RISC-V-Team17/blob/pipelined/rtl/decode/control.sv) and [decode_execute.sv](https://github.com/vishalarun7/RISC-V-Team17/blob/pipelined/rtl/pipelines/decode_execute.sv)
+
+### Internal forwarding
+
+If the execute stage is writing to a register that the fetch stage requires, there is a delay that breaks it so this piece of logic is required:
+
+```sv
+assign RD1 = (AD1 == 0) ? 0 : 
+                (WE3 && (AD1 == AD3)) ? WD3 : 
+                register[AD1];
+                
+assign RD2 = (AD2 == 0) ? 0 : 
+                (WE3 && (AD2 == AD3)) ? WD3 : 
+                register[AD2];
+```
+
+### F1 testing in pipeline
