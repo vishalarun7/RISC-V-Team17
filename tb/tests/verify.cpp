@@ -40,13 +40,100 @@ TEST_F(CpuTestbench, TestJalRet)
     EXPECT_EQ(top_->a0, 53);
 }
 
-TEST_F(CpuTestbench, TestPdf)
+
+
+TEST_F(CpuTestbench, TestPdfGauss)
 {
     setupTest("5_pdf");
     setData("reference/gaussian.mem");
     initSimulation();
-    runSimulation(CYCLES * 100);
-    EXPECT_EQ(top_->a0, 15363);
+    if (vbdOpen() != 1)
+        FAIL();
+    vbdHeader("PDF Gaussian");
+    int cyc = 0;
+    int tick;
+
+    while (top_->a0 == 0) {
+        runSimulation(1);
+        cyc++;
+    }
+    
+    for (; cyc < CYCLES * 100; cyc++) {
+        runSimulation(1);
+
+        vbdCycle(cyc);
+        vbdPlot(top_->a0, 0, 255);
+
+        if (Verilated::gotFinish() || top_->a0 == 15363) {
+            vbdClose();
+            EXPECT_EQ(top_->a0, 15363);
+        }
+    }
+
+    vbdClose();
+    
+}
+TEST_F(CpuTestbench, TestPdfNoisy)
+{
+    setupTest("5_pdf");
+    setData("reference/noisy.mem");
+    initSimulation();
+    if (vbdOpen() != 1)
+        FAIL();
+    vbdHeader("PDF Noisy");
+    int cyc = 0;
+    int tick;
+
+    while (top_->a0 == 0) {
+        runSimulation(1);
+        cyc++;
+    }
+    
+    for (; cyc < CYCLES * 100; cyc++) {
+        runSimulation(1);
+
+        vbdCycle(cyc);
+        vbdPlot(top_->a0, 0, 255);
+
+        if (Verilated::gotFinish() || top_->a0 == 15363) {
+            vbdClose();
+            EXPECT_EQ(top_->a0, 15363);
+        }
+    }
+
+    vbdClose();
+    
+}
+TEST_F(CpuTestbench, TestPdfTriangle)
+{
+    setupTest("5_pdf");
+    setData("reference/triangle.mem");
+    initSimulation();
+    if (vbdOpen() != 1)
+        FAIL();
+    vbdHeader("PDF Triangle");
+    int cyc = 0;
+    int tick;
+
+    while (top_->a0 == 0) {
+        runSimulation(1);
+        cyc++;
+    }
+    
+    for (; cyc < CYCLES * 100; cyc++) {
+        runSimulation(1);
+
+        vbdCycle(cyc);
+        vbdPlot(top_->a0, 0, 255);
+
+        if (Verilated::gotFinish() || top_->a0 == 15363) {
+            vbdClose();
+            EXPECT_EQ(top_->a0, 15363);
+        }
+    }
+
+    vbdClose();
+    
 }
 
 TEST_F(CpuTestbench, F1)
