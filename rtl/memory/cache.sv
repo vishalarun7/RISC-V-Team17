@@ -132,6 +132,7 @@ module cache #(
 
 
 
+
     //mux
 
     logic [31:0] mux0_out;
@@ -206,7 +207,11 @@ module cache #(
         end
 
         if (hit && !MemWrite) begin //load
-            read_data <= data_out;
+            if (AddrMode) begin  // Byte load
+                read_data <= {24'b0, data_out[(byte_offset*8) +: 8]};
+            end else begin  // Word load
+                read_data <= data_out;
+            end
             if (hit0) begin
                 cache[0][set][u] <= 1;
                 cache[1][set][u] <= 0;
@@ -259,6 +264,14 @@ module cache #(
                 else begin
                     cache[victim_reg][set][(block_offset*32)+(byte_offset*8) +: 8] <= write_data[7:0];
                 end                
+            end
+            else begin  // Load miss - need to read the data we just fetched
+                if (AddrMode) begin  // Byte load
+                    read_data <= {24'b0, mem_readdata[(block_offset*32)+(byte_offset*8) +: 8]};
+                end
+                else begin  // Word load
+                    read_data <= mem_readdata[(block_offset*32) +: 32];
+                end
             end
         end
     end
