@@ -172,7 +172,7 @@ For the tests provided (`1_addi_bne` `2_li_add` `3_lbu_sb` `4_jal_ret` `5_pdf`):
 
 -- 
 
-## Pipelined -
+## Pipelined Processer
 The pipelined implementation supports the RV32I instruction set, dividing the processor into four main stages: fetch, decode, execute, and memory. The fundamental principle of pipelining is parallel instruction execution, where different stages of multiple instructions are processed simultaneously. This increases instruction throughput and, in real-world CPUs, enables higher clock speeds. Together, these improvements result in faster program execution compared to the single-cycle variant.
 
 ## File Structure
@@ -222,3 +222,99 @@ The pipelined implementation supports the RV32I instruction set, dividing the pr
 
 ```
 
+## Implementation
+
+Transitioning from single-cycle to pipelined introduces various significant changes to the design structure. There are many new modules and concepts in the pipelined version.
+
+# 1. Pipeline Registers
+- Pipeline registers separate each stage of the pipeline.
+- They hold all relevant instruction data, including control signals, for processing in the next stage.
+- Updated on every negative clock edge with new subsequent instruction information.
+
+# 2. New Control Unit Signals
+- **Branch Flag:**
+  - Carried to the execute stage for branch evaluation.
+- **Jump Flag:**
+  - Controls JAL and JALR instructions in the execute stage.
+
+# 3. Branch Logic Module
+- Branch evaluation is deferred to the execute stage to utilize ALU flags, introducing a delay compared to single-cycle processing.
+- Determines branch conditions using:
+  1. ALU flags
+  2. Branch signals
+  3. Jump signals
+
+# 4. Hazard Detection Unit
+- Resolves data hazards by forwarding data from the memory or write-back stages to the execute stage.
+- Uses new wires from the decode stage carrying operand addresses to compare against destination registers in later stages.
+- Includes forwarding multiplexers to select the appropriate forwarding data source.
+
+# 5. Flushing Mechanism
+- Clears the decode pipeline register to remove incorrect instructions if a branch is taken.
+- Activates when the branch logic module determines a jump is executing.
+
+
+## Testing
+
+--
+
+## Data Memory Cache
+
+Cache memory in RISC-V employs direct-mapped, set-associative, or fully associative mapping to determine data placement, in this implementation we utilise 2-way set associative cache. Tags and valid bits identify cached data, while replacement policies like LRU handle evictions. Write policies such as write-through and write-back manage consistency between cache and memory. These techniques ensure efficient data access, reducing latency and leveraging locality principles for optimised performance.
+
+
+## File Structure
+
+```
+.
+├── rtl
+│   ├── adder.sv
+│   ├── decode
+│   │   ├── control.sv
+│   │   ├── reg_file.sv
+│   │   └── signextend.sv
+│   ├── execute
+│   │   ├── alu.sv
+│   ├── fetch
+│   │   ├── fetch_top.sv
+│   │   ├── instr_mem.sv
+│   │   └── pc_register.sv
+│   ├── memory
+│   │   ├── datamem.sv
+│   └── top.sv
+└── tb
+    ├── asm
+    │   ├── 1_addi_bne.s
+    │   ├── 2_li_add.s
+    │   ├── 3_lbu_sb.s
+    │   ├── 4_jal_ret.s
+    │   ├── 5_pdf.s
+    │   ├── f1_fsm.s
+    │   └── f1_fsm_simplified.s
+    ├── assemble.sh
+    ├── bash
+    │   ├── control_test.sh
+    │   ├── decode_top_test.sh
+    │   ├── execute_test.sh
+    │   ├── fetch_test.sh
+    │   ├── memory_test.sh
+    │   ├── reg_file_test.sh
+    │   └── sign_extend_test.sh
+    ├── doit.sh
+    ├── assemble.sh
+    ├── vbuddy.cfg
+    ├── verification.md
+    ├── tests
+    │   ├── cpu_testbench.h
+    │   └── verify.cpp
+
+```
+
+## Implementation
+
+
+
+
+## Testing
+
+--
