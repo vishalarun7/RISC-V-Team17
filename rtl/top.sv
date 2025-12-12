@@ -43,6 +43,13 @@ module top #(
 
     logic [DATA_WIDTH-1:0] a0_regfile;
 
+    logic            mem_req;
+    logic            WriteEnable;
+    logic [31:0]     memory_address;
+    logic [127:0]    mem_writedata;
+    logic [127:0]   mem_readdata;
+    logic           mem_ready;
+
     fetch_top #(
     .WIDTH(DATA_WIDTH)
     ) fetch_stage (
@@ -221,11 +228,29 @@ module top #(
 
      datamem #(.WIDTH(DATA_WIDTH)) datamem_inst (
         .clk(clk),
-        .aluresult(ALUResultM),
-        .RD2(WriteDataM),
-        .MemWrite(MemWriteM),
-        .AddrMode(AddrModeM),
-        .RD(ReadDataM)
+        .mem_req (mem_req),
+        .WriteEnable (WriteEnable),
+        .memory_address (memory_address),
+        .mem_writedata (mem_writedata),
+        .mem_readdata (mem_readdata),
+        .mem_ready (mem_ready)
+    );
+
+    cache cache_inst (
+        .clk (clk),
+        .rst (rst),
+        .data_address (ALUResultM),
+        .write_data (WriteDataM),
+        .MemWrite (MemWriteM),
+        .AddrMode (AddrModeM),
+        .read_data (ReadDataM),
+        .stall(StallF),
+        .mem_req (mem_req),
+        .WriteEnable (WriteEnable),
+        .memory_address (memory_address),
+        .mem_writedata (mem_writedata),
+        .mem_readdata (mem_readdata),
+        .mem_ready (mem_ready)
     );
 
     memory_writeback #(
