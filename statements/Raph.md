@@ -303,3 +303,14 @@ The following tests were added:
 **U-Type:**
 - lui_addi.s
 - lui_basic.s
+
+
+## What I learnt
+
+I learnt that for a big project like this, it is crucial to work with your teammates and understand what they are doing. 
+
+Being the person debugging and integrating the system, it made me realise the importance of having a base understanding and overview of the whole system as without that, the CPU wouldn't work even though each module does.
+
+## What would I do if I had more time
+
+If I had more time, I would put the CPU onto an FPGA to see it work and interact with other hardware.
