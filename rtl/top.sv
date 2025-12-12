@@ -51,6 +51,9 @@ module top #(
     logic [127:0]    mem_writedata;
     logic [127:0]   mem_readdata;
     logic           mem_ready;
+    logic           cache_req;
+
+    assign cache_req = ((ResultSrcM == 2'b01) || MemWriteM);
 
     fetch_top #(
     .WIDTH(DATA_WIDTH)
@@ -306,8 +309,8 @@ module top #(
     .FlushD(FlushD)
 );
 
-assign StallF = StallF_hazard | CacheStall;
-assign StallD = StallD_hazard | CacheStall;
+assign StallF = StallF_hazard | (CacheStall & cache_req);
+assign StallD = StallD_hazard | (CacheStall & cache_req);
 
 assign a0 = a0_regfile;
 
