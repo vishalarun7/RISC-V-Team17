@@ -60,6 +60,12 @@ module cache #(
     assign d1 = cache[1][set][d];
     assign tag1 = cache[1][set][t:t_];
 
+    logic [151:0] way0; 
+    logic [151:0] way1;
+
+        assign way0 = cache[0][set];
+        assign way1 = cache[1][set]; 
+
     //fsm
 
     typedef enum logic [2:0] {
@@ -197,7 +203,7 @@ module cache #(
             state <= IDLE;
             for (int i = 0; i < ways; i++) begin
                 for (int j = 0; j < sets; j++) begin
-                    cache[i][j][v] <= 0;
+                    cache[i][j] = 152'b0;
                 end
             end
         end
@@ -274,5 +280,7 @@ module cache #(
             end
         end
     end
+
+    
 
 endmodule

@@ -13,9 +13,9 @@ module datamem #(
     logic [7:0] ram_array [32'h0001FFFF:0];
 
     //init data memory from data.hex file
-    initial begin
-        $readmemh("data.hex", ram_array, 32'h00010000);
-    end
+ //   initial begin
+  //      $readmemh("data.hex", ram_array, 32'h00010000);
+  //  end
 
     // store
     always_ff @(posedge clk) begin
@@ -41,22 +41,23 @@ module datamem #(
             mem_ready <= 1;
         end
         else if (mem_req && !WriteEnable) begin
-            mem_readdata <= {ram_array[memory_address+15],
-                            ram_array[memory_address+14],
-                            ram_array[memory_address+13],
-                            ram_array[memory_address+12],
-                            ram_array[memory_address+11],
-                            ram_array[memory_address+10],
-                            ram_array[memory_address+9],
-                            ram_array[memory_address+8],
-                            ram_array[memory_address+7],
-                            ram_array[memory_address+6],
-                            ram_array[memory_address+5],
-                            ram_array[memory_address+4],
-                            ram_array[memory_address+3],
-                            ram_array[memory_address+2],
+            mem_readdata <= {ram_array[memory_address],
                             ram_array[memory_address+1],
-                            ram_array[memory_address]};
+                            ram_array[memory_address+2],
+                            ram_array[memory_address+3],
+                            ram_array[memory_address+4],
+                            ram_array[memory_address+5],
+                            ram_array[memory_address+6],
+                            ram_array[memory_address+7],
+                            ram_array[memory_address+8],
+                            ram_array[memory_address+9],
+                            ram_array[memory_address+10],
+                            ram_array[memory_address+11],
+                            ram_array[memory_address+12],
+                            ram_array[memory_address+13],
+                            ram_array[memory_address+14],
+                            ram_array[memory_address+15]};
+
             mem_ready <= 1;
         end
     end

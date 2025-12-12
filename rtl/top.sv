@@ -245,18 +245,26 @@ module top #(
         .mem_ready (mem_ready)
     );
 
+
+
     assign cache_req = ((ResultSrcM == 2'b01) || MemWriteM);
 
-    logic cache_stall;
     
+    logic [DATA_WIDTH-1:0] data_address;
+    logic [DATA_WIDTH-1:0] write_data;
+    logic MemWrite;
+    logic AddrMode;
 
+    assign data_address = ALUResultM & {DATA_WIDTH{cache_req}};
+    assign write_data   = WriteDataM & {DATA_WIDTH{cache_req}};
+    
     cache cache_inst (
         .clk (clk),
         .rst (rst),
-        .data_address (ALUResultM),
-        .write_data (WriteDataM),
-        .MemWrite (MemWriteM),
-        .AddrMode (AddrModeM),
+        .data_address (data_address),
+        .write_data (write_data),
+        .MemWrite (MemWrite),
+        .AddrMode (AddrMode),
         .read_data (ReadDataM),
         .stall(CacheStall),
         .mem_req (mem_req),
@@ -321,8 +329,8 @@ module top #(
     .FlushD(FlushD)
 );
 
-assign StallF = StallF_hazard | (CacheStall & cache_req);
-assign StallD = StallD_hazard | (CacheStall & cache_req);
+assign StallF = StallF_hazard | CacheStall;
+assign StallD = StallD_hazard | CacheStall;
 
 assign a0 = a0_regfile;
 
