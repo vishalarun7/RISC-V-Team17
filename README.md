@@ -1,41 +1,50 @@
 # RISC-V-Team17
+
 RISC-V 32I CPU designed as part of the Instruction Architectures and Compilers class.
 
-# Table of contents:
+---
+
+## Table of Contents
 
 - [Quick Start](#quick-start)
-- [Single Cycle CPU Implementation](#single-cycle)
-- [Pipelined CPU Implementation](#pipelined-risc-v-cpu)
-- [Cached Implementation](#data-memory-cache)
+- [Single Cycle](#single-cycle)
+- [Pipelined](#pipelined)
+- [Cache](#cache)
 
-# Quick Start
+---
 
-We completed the Single-Cycle and 2 of the stretch goals (Pipelined, Two-Way Set Associative Write-Back Cache). These can be found it :
-| Branch | Description |
-| ------ | ----------- |
-|`main` | Single-Cycle Implementation |
-|`pipelined` | Pipelined (+ Full RV32I Implementation) Implementation |
-|`cache` | Cache + Single-Cycle Implementation |
+## Quick Start
 
-<br>
+We completed the Single-Cycle CPU and two stretch goals (Pipelined CPU and Two-Way Set Associative Write-Back Cache).  
+These are organised into the following branches:
 
-To access each version,
+| Branch    | Description                                   |
+|----------|-----------------------------------------------|
+| `main`   | Single-Cycle Implementation                   |
+| `pipelined` | Pipelined Implementation (+ full RV32I)   |
+| `cache`  | Cache + Single-Cycle Implementation           |
+
+To access each version:
+
 ```bash
 git checkout <branch-name>
 ```
 
-### **IMPORTANT:** Please run all testbench scripts while in `/tb`. For simplicity, testbenches were written with absolute path referenced from `/tb`.
+### Testbench Usage
 
-#### Quick Start - GTest Testing
+> IMPORTANT: Run all testbench scripts from the `/tb` directory.  
+> Testbenches are written assuming absolute paths referenced from `/tb`.
 
-To run the provided tests within the target branch,
+#### GTest Testing
+
+To run the provided tests in the selected branch:
 ```bash
  cd ./tb
 doit.sh tests/verify.cpp
 ```
 
 
-## Contributions
+### Contributions
 
 | Category         | Module                            | Vishal | Nikhil | Emir | Raph |
 |------------------|-----------------------------------|:------:|:------:|:----:|:----:|
@@ -51,131 +60,112 @@ doit.sh tests/verify.cpp
 |                  | **Decode–Execute Pipeline**       |   X    |        |      |      |
 |                  | **Execute–Memory Pipeline**       |   X    |        |      |      |
 |                  | **Memory–Writeback Pipeline**     |   X    |        |      |      |
-|                  | **Hazard Unit**                   |   X   |      |      |      |
-|                  | **System Integration + Debugging**|      |    *  |      |   X   |
-| **Cache**        | **Memory (Refactor)**             |        |    X    |      |      |
-|                  | **Direct-Mapped Cache**           |        |     X   |      |      |
-|                  | **Two-Way Set Associative Cache** |        |      X  |      |      |
-|                  | **System Integration + Debugging** |        |      X  |      |   *   |
-
+|                  | **Hazard Unit**                   |   X    |        |      |      |
+|                  | **System Integration + Debugging**|        |   *    |      |  X   |
+| **Cache**        | **Memory (Refactor)**             |        |   X    |      |      |
+|                  | **Direct-Mapped Cache**           |        |   X    |      |      |
+|                  | **Two-Way Set Associative Cache** |        |   X    |      |      |
+|                  | **System Integration + Debugging**|        |   X    |      |  *   |
 | **Verification** | **F1 Testing**                    |        |        |      |  X   |
 |                  | **PDF Testing**                   |        |        |      |  X   |
 |                  | **System Testing & Debugging**    |        |        |      |  X   |
 |                  | **F1 Assembly.s**                 |        |        |      |  X   |
 | **Other**        | **Vbuddy**                        |        |        |      |  X   |
 
+Legend:  
+- **X** = Lead contributor  
+- **\*** = Partial contributor  
 
-**X = Lead Contributor**  
-**\* = Partial Contributor**
+---
 
-## Single Cycle - 
-This single cycle implementation covers the basic requirements for most CPU operations, this implements the following instructions: R-type, I-type (immediate), lbu, sb, beq, bne, jal, jalr, lui.
+## Single Cycle
+
+### Overview
+
+The single-cycle implementation supports the core RV32I subset, including:  
+R-type, I-type (immediate), `lbu`, `sb`, `beq`, `bne`, `jal`, `jalr`, and `lui`.
+
+### File Structure
 
 
-## File Structure
+The processor implementation lives in `rtl`, and all testing infrastructure lives in `tb`.  
+The `tb` folder contains:
 
-```
-.
-├── rtl
-│   ├── adder.sv
-│   ├── decode
-│   │   ├── control.sv
-│   │   ├── reg_file.sv
-│   │   └── signextend.sv
-│   ├── execute
-│   │   ├── alu.sv
-│   ├── fetch
-│   │   ├── fetch_top.sv
-│   │   ├── instr_mem.sv
-│   │   └── pc_register.sv
-│   ├── memory
-│   │   ├── datamem.sv
-│   └── top.sv
-└── tb
-    ├── asm
-    │   ├── 1_addi_bne.s
-    │   ├── 2_li_add.s
-    │   ├── 3_lbu_sb.s
-    │   ├── 4_jal_ret.s
-    │   ├── 5_pdf.s
-    │   ├── f1_fsm.s
-    │   └── f1_fsm_simplified.s
-    ├── assemble.sh
-    ├── bash
-    │   ├── control_test.sh
-    │   ├── decode_top_test.sh
-    │   ├── execute_test.sh
-    │   ├── fetch_test.sh
-    │   ├── memory_test.sh
-    │   ├── reg_file_test.sh
-    │   └── sign_extend_test.sh
-    ├── doit.sh
-    ├── assemble.sh
-    ├── vbuddy.cfg
-    ├── verification.md
-    ├── tests
-    │   ├── cpu_testbench.h
-    │   └── verify.cpp
+- Assembly programs (`1`–`5` and `f1_fsm` variants)  
+- `assemble.sh` – assembles RISC‑V source into machine code  
+- VBuddy-related configs/tests (plus generated artefacts such as `*.vcd`)
 
-```
+> Note: only the single-cycle version shows the full `tb` contents for brevity.
 
-The processor development is done in the register transfer level (`rtl`) folder and the testing is performed in the test bench folder (`tb`).
-The test bench folder contains:
-- Assembly files (1 to 5 provided and f1_fsm) - in later versions
-- `assemble.sh` - translating RISCV assembly to machine code
-- `vbuddy_test` - Tests creating to verify RISCV performance with VBuddy (provided)
-Other files are either a result of these files (testing outputs e.g. `*.vcd`) or were provided.
+### Instruction Support
 
-Note: only for this version, is the `tb` folder shown, this contains the tests and shows all other execution files
+| Type     | Instructions                                                    |
+|----------|-----------------------------------------------------------------|
+| R        | `add`, `sub`, `xor`, `or`, `and`, `sll`, `srl`, `sra`, `slt`, `sltu` |
+| I (ALU)  | `addi`, `xori`, `ori`, `andi`, `slli`, `srli`, `srai`, `slti`, `sltiu` |
+| I (load) | `lbu`, `lw`                                                     |
+| I (jump) | `jalr`                                                          |
+| S        | `sb`, `sw`                                                      |
+| B        | `beq`, `bne`                                                    |
+| U        | `lui`                                                           |
+| J        | `jal`                                                           |
 
-## Implementation
-Instructions implemented:
+### Testing
 
-| Type     | Instruction                                                    |
-| -------- | -------------------------------------------------------------- |
-| R        | `add` `sub` `xor` `or` `and` `sll` `srl` `sra` `slt` `sltu`    |
-| I (ALU)  | `addi` `xori` `ori` `andi` `slli` `srli` `srai` `slti` `sltiu` |
-| I (load) | `lbu` `lw`                                                     |
-| I (jump) | `jalr`                                                         |
-| S        | `sb` `sw`                                                      |
-| B        | `beq` `bne`                                                    |
-| U        | `lui`                                                          |
-| J        | `jal`                                                          |
+#### Core Tests
 
-## Testing
+For the provided assembly tests:
 
-##### Note: if any of the videos fail to load, please find the videos in `./images/vbuddy_tests/`
+- `1_addi_bne`  
+- `2_li_add`  
+- `3_lbu_sb`  
+- `4_jal_ret`  
+- `5_pdf`  
 
-For the tests provided (`1_addi_bne` `2_li_add` `3_lbu_sb` `4_jal_ret` `5_pdf`):
+The waveforms and behaviour can be inspected via the generated traces and VBuddy outputs.
 
-![Single cycle testing](/images/single-cycle-tests.png)
+Single-cycle verification image:  
+`images/single-cycle-tests.png`
 
-### F1
-![Video for F1 lights](images/vbuddy_tests/F1.gif)
+#### F1
 
-[Link to Video](images/vbuddy_tests/F1_FSM.mp4)
+- GIF: `images/vbuddy_tests/F1.gif`  
+- Video: `images/vbuddy_tests/F1_FSM.mp4`
 
-### PDF: Gaussian
-![Video for PDF: Gaussian Test](images/vbuddy_tests/PDF-Gaussian.gif)
+#### PDF: Gaussian
 
-[Link to Video (Higher quality)](images/vbuddy_tests/PDF-Gaussian.mp4)
+- GIF: `images/vbuddy_tests/PDF-Gaussian.gif`  
+- Video: `images/vbuddy_tests/PDF-Gaussian.mp4`
 
-### PDF: Noisy
-![Video for PDF: Noisy test](images/vbuddy_tests/PDF-Noisy.gif)
+#### PDF: Noisy
 
-[Link to Video (Higher Quality)](images/vbuddy_tests/PDF-Noisy.mp4)
+- GIF: `images/vbuddy_tests/PDF-Noisy.gif`  
+- Video: `images/vbuddy_tests/PDF-Noisy.mp4`
 
-### PDF: Triangle
-![Video for PDF: Triangle test](images/vbuddy_tests/PDF-Triangle.gif)
+#### PDF: Triangle
 
-[Link to Video (Higher Quality)](/images/vbuddy_tests/PDF-Triangle.mp4)
+- GIF: `images/vbuddy_tests/PDF-Triangle.gif`  
+- Video: `images/vbuddy_tests/PDF-Triangle.mp4`
 
--- 
+If any embedded videos fail to load, open them directly from `./images/vbuddy_tests/`.
 
-## Pipelined Processer
-The pipelined implementation supports the RV32I instruction set, dividing the processor into four main stages: fetch, decode, execute, and memory. The fundamental principle of pipelining is parallel instruction execution, where different stages of multiple instructions are processed simultaneously. This increases instruction throughput and, in real-world CPUs, enables higher clock speeds. Together, these improvements result in faster program execution compared to the single-cycle variant.
+---
 
-## File Structure
+## Pipelined
+
+### Overview
+
+The pipelined implementation supports the full RV32I instruction set.  
+The CPU is split into four main stages:
+
+1. Fetch  
+2. Decode  
+3. Execute  
+4. Memory / Writeback  
+
+Pipelining enables multiple instructions to be in-flight simultaneously, improving throughput compared to the single-cycle design.
+
+### File Structure
 
 ```
 .
@@ -222,48 +212,65 @@ The pipelined implementation supports the RV32I instruction set, dividing the pr
 
 ```
 
-## Implementation
 
-Transitioning from single-cycle to pipelined introduces various significant changes to the design structure. There are many new modules and concepts in the pipelined version.
+### Implementation Details
 
-# 1. Pipeline Registers
-- Pipeline registers separate each stage of the pipeline.
-- They hold all relevant instruction data, including control signals, for processing in the next stage.
-- Updated on every negative clock edge with new subsequent instruction information.
+#### 1. Pipeline Registers
 
-# 2. New Control Unit Signals
-- **Branch Flag:**
-  - Carried to the execute stage for branch evaluation.
-- **Jump Flag:**
-  - Controls JAL and JALR instructions in the execute stage.
+- Separate each pipeline stage (F–D, D–E, E–M, M–W).  
+- Latch instruction data and derived control signals for the next stage.  
+- Typically updated on the active clock edge (e.g. negative edge in this design).
 
-# 3. Branch Logic Module
-- Branch evaluation is deferred to the execute stage to utilize ALU flags, introducing a delay compared to single-cycle processing.
-- Determines branch conditions using:
-  1. ALU flags
-  2. Branch signals
-  3. Jump signals
+#### 2. Extended Control Signals
 
-# 4. Hazard Detection Unit
-- Resolves data hazards by forwarding data from the memory or write-back stages to the execute stage.
-- Uses new wires from the decode stage carrying operand addresses to compare against destination registers in later stages.
-- Includes forwarding multiplexers to select the appropriate forwarding data source.
+- **Branch flag**: carried into the execute stage for branch condition evaluation.  
+- **Jump flag**: controls `jal` and `jalr` behaviour in the execute stage.
 
-# 5. Flushing Mechanism
-- Clears the decode pipeline register to remove incorrect instructions if a branch is taken.
-- Activates when the branch logic module determines a jump is executing.
+#### 3. Branch Logic
 
+- Branch decision moved to the execute stage to reuse ALU comparison results.  
+- Consumes:
+  - ALU flags  
+  - Branch control signals  
+  - Jump control signals  
+- Introduces a control hazard penalty on taken branches.
 
-## Testing
+#### 4. Hazard Detection / Forwarding
 
---
+- Detects data hazards by comparing source register addresses from decode with destination registers in later stages.  
+- Forwards results from memory or writeback back to execute through multiplexers.  
+- Minimises stalls while preserving correctness.
 
-## Data Memory Cache
+#### 5. Flushing
 
-Cache memory in RISC-V employs direct-mapped, set-associative, or fully associative mapping to determine data placement, in this implementation we utilise 2-way set associative cache. Tags and valid bits identify cached data, while replacement policies like LRU handle evictions. Write policies such as write-through and write-back manage consistency between cache and memory. These techniques ensure efficient data access, reducing latency and leveraging locality principles for optimised performance.
+- On a taken branch or jump, clears the decode pipeline register.  
+- Prevents wrong-path instructions from committing.
 
+### Testing
 
-## File Structure
+Testing follows the same `tb` infrastructure and `doit.sh` flow as in the single-cycle design, with additional checks for correctness under hazards and branches.
+
+---
+
+## Cache
+
+### Overview
+
+The cached implementation introduces a data memory hierarchy on top of the single-cycle core.  
+It uses a two-way set-associative, write-back cache to reduce effective memory latency by exploiting spatial and temporal locality.
+
+### Design Notes
+
+- Organisation: 2-way set-associative data cache.  
+- Each line stores:
+  - Tag  
+  - Valid bit  
+  - Dirty bit (for write-back)  
+- Replacement: LRU-based policy between the two ways.  
+- Write policy: write-back with write-allocate on misses.
+
+### File Structure
+
 
 ```
 .
@@ -310,11 +317,25 @@ Cache memory in RISC-V employs direct-mapped, set-associative, or fully associat
 
 ```
 
-## Implementation
 
+### Implementation
 
+At a high level:
 
+- On each load/store, the cache checks the indexed set for a matching tag.  
+- On hit:
+  - Loads return data directly.  
+  - Stores update the line and mark it dirty (write-back).  
+- On miss:
+  - Selects a victim way via LRU.  
+  - If dirty, writes back to `datamem`.  
+  - Fetches the new line, updates tag/valid/dirty, then services the request.
 
-## Testing
+### Testing
 
+Cache testing reuses the `tb` infrastructure with programs designed to stress:
+
+- Repeated accesses to the same addresses (temporal locality).  
+- Stride patterns that map to the same set (tests LRU and conflict behaviour).  
+- Write-heavy workloads (tests write-back correctness).
 --
