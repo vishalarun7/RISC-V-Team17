@@ -14,8 +14,15 @@ module regfile #(
     logic [ADDRESS_WIDTH-1:0] register [31:0];
 
     assign a0  = register[10];
-    assign RD1 = (AD1 == 0) ? 0 : register[AD1];
-    assign RD2 = (AD2 == 0) ? 0 : register[AD2];
+    
+    // Internal forwarding: if writing and reading same register in same cycle, forward write data
+    assign RD1 = (AD1 == 0) ? 0 : 
+                 (WE3 && (AD1 == AD3)) ? WD3 : 
+                 register[AD1];
+                 
+    assign RD2 = (AD2 == 0) ? 0 : 
+                 (WE3 && (AD2 == AD3)) ? WD3 : 
+                 register[AD2];
 
     always_ff @(negedge clk) begin //adjusted to write on negative edge of clock
         if (WE3 && AD3 != 5'd0) begin
