@@ -84,8 +84,144 @@ Our contributions to the assignement are summarized in the table below.
 | **Other**        | **Vbuddy**                        |        |        |      |  X   |
 
  
+## Directory Structure 
+```
+├── images
+│   ├── cache.png
+│   ├── harris.png
+│   ├── image.png
+│   ├── pipelinetest.png
+│   └── Single.png
+├── README.md
+├── rtl
+│   ├── decode
+│   │   ├── control.sv
+│   │   ├── immext.sv
+│   │   └── regfile.sv
+│   ├── execute
+│   │   └── alu.sv
+│   ├── fetch
+│   │   ├── fetch_top.sv
+│   │   ├── instr_mem.sv
+│   │   └── pc_reg.sv
+│   ├── memory
+│   │   └── datamem.sv
+│   ├── sv_components
+│   │   ├── adder.sv
+│   │   ├── mux2.sv
+│   │   └── mux4.sv
+│   └── top.sv
+├── statements
+│   ├── Raph.md
+│   └── Vishal.md
+└── tb
+    ├── asm
+    │   ├── 1_addi_bne.s
+    │   ├── 2_li_add.s
+    │   ├── 3_lbu_sb.s
+    │   ├── 4_jal_ret.s
+    │   ├── 5_pdf.s
+    │   ├── f1.s
+    │   ├── pipeline
+    │   │   ├── 1_add.s
+    │   │   ├── 2_add_sub.s
+    │   │   ├── 3_l_hazard.s
+    │   │   └── 4_s_hazard.s
+    │   └── pipeline_tests
+    │       └── 1_add.s
+    ├── assemble.sh
+    ├── doit.sh
+    ├── reference
+    │   ├── format_hex.sh
+    │   ├── gaussian.mem
+    │   ├── images
+    │   │   ├── memory_map.jpg
+    │   │   └── pdf_listing.jpg
+    │   ├── Makefile
+    │   ├── noisy.mem
+    │   ├── pdf.asm
+    │   ├── pdf.hex
+    │   ├── pdf.s
+    │   ├── README.md -> Reference_Prog.md
+    │   ├── Reference_Prog.md
+    │   ├── Reference_Prog.pdf
+    │   └── triangle.mem
+    ├── test_out
+    │   ├── 1_addi_bne
+    │   │   ├── data.hex
+    │   │   ├── program.dis
+    │   │   ├── program.hex
+    │   │   └── waveform.vcd
+    │   ├── 2_li_add
+    │   │   ├── data.hex
+    │   │   ├── program.dis
+    │   │   ├── program.hex
+    │   │   └── waveform.vcd
+    │   ├── 3_lbu_sb
+    │   │   ├── data.hex
+    │   │   ├── program.dis
+    │   │   ├── program.hex
+    │   │   └── waveform.vcd
+    │   ├── 4_jal_ret
+    │   │   ├── data.hex
+    │   │   ├── program.dis
+    │   │   ├── program.hex
+    │   │   └── waveform.vcd
+    │   ├── 5_pdf
+    │   │   ├── data.hex
+    │   │   ├── program.dis
+    │   │   ├── program.hex
+    │   │   └── waveform.vcd
+    │   ├── f1
+    │   │   ├── data.hex
+    │   │   ├── program.dis
+    │   │   ├── program.hex
+    │   │   └── waveform.vcd
+    │   └── obj_dir
+    │       ├── Vdut
+    │       ├── Vdut___024root__DepSet_hbd7b84b1__0__Slow.cpp
+    │       ├── Vdut___024root__DepSet_hbd7b84b1__0.cpp
+    │       ├── Vdut___024root__DepSet_hbf6d145a__0__Slow.cpp
+    │       ├── Vdut___024root__DepSet_hbf6d145a__0.cpp
+    │       ├── Vdut___024root__Slow.cpp
+    │       ├── Vdut___024root.h
+    │       ├── Vdut__ALL.a
+    │       ├── Vdut__ALL.cpp
+    │       ├── Vdut__ALL.d
+    │       ├── Vdut__ALL.o
+    │       ├── Vdut__ConstPool_0.cpp
+    │       ├── Vdut__pch.h
+    │       ├── Vdut__Syms.cpp
+    │       ├── Vdut__Syms.h
+    │       ├── Vdut__Trace__0__Slow.cpp
+    │       ├── Vdut__Trace__0.cpp
+    │       ├── Vdut__TraceDecls__0__Slow.cpp
+    │       ├── Vdut_classes.mk
+    │       ├── Vdut.cpp
+    │       ├── Vdut.h
+    │       ├── Vdut.mk
+    │       ├── verify.d
+    │       ├── verify.o
+    │       ├── verilated_threads.d
+    │       ├── verilated_threads.o
+    │       ├── verilated_vcd_c.d
+    │       ├── verilated_vcd_c.o
+    │       ├── verilated.d
+    │       └── verilated.o
+    ├── tests
+    │   ├── cpu_testbench.h
+    │   ├── pipeline.cpp
+    │   ├── test_pipeline.cpp
+    │   ├── vbuddy.cfg
+    │   ├── vbuddy.cpp
+    │   └── verify.cpp
+    ├── vbuddy.cfg
+    ├── verification.md
+    └── videos
+        ├── pipeline.mp4
+        └── singlecycle.mp4
 
-
+```
 ---
 
 ----
@@ -142,7 +278,7 @@ Single-cycle verification image:
 
 #### F1
 
-- Video: `images/vbuddy_tests/F1_FSM.mp4`
+- Video: `tb/videos/vbuddy_tests/F1_FSM.mp4`
 
 #### PDF: Gaussian
 
@@ -173,54 +309,6 @@ The CPU is split into four main stages:
 4. Memory / Writeback  
 
 Pipelining enables multiple instructions to be in-flight simultaneously, improving throughput compared to the single-cycle design.
-
-### File Structure
-
-```
-.
-├── rtl
-│   ├── adder.sv
-│   ├── decode
-│   │   ├── control.sv
-│   │   ├── reg_file.sv
-│   │   └── signextend.sv
-│   ├── execute
-│   │   ├── alu.sv
-│   ├── fetch
-│   │   ├── fetch_top.sv
-│   │   ├── instr_mem.sv
-│   │   └── pc_register.sv
-│   ├── memory
-│   │   ├── datamem.sv
-│   └── top.sv
-└── tb
-    ├── asm
-    │   ├── 1_addi_bne.s
-    │   ├── 2_li_add.s
-    │   ├── 3_lbu_sb.s
-    │   ├── 4_jal_ret.s
-    │   ├── 5_pdf.s
-    │   ├── f1_fsm.s
-    │   └── f1_fsm_simplified.s
-    ├── assemble.sh
-    ├── bash
-    │   ├── control_test.sh
-    │   ├── decode_top_test.sh
-    │   ├── execute_test.sh
-    │   ├── fetch_test.sh
-    │   ├── memory_test.sh
-    │   ├── reg_file_test.sh
-    │   └── sign_extend_test.sh
-    ├── doit.sh
-    ├── assemble.sh
-    ├── vbuddy.cfg
-    ├── verification.md
-    ├── tests
-    │   ├── cpu_testbench.h
-    │   └── verify.cpp
-
-```
-
 
 ### Implementation Details
 
@@ -279,53 +367,6 @@ It uses a two-way set-associative, write-back cache to reduce effective memory l
 - Replacement: LRU-based policy between the two ways.  
 - Write policy: write-back with write-allocate on misses.
 
-### File Structure
-
-```
-.
-├── rtl
-│   ├── adder.sv
-│   ├── decode
-│   │   ├── control.sv
-│   │   ├── reg_file.sv
-│   │   └── signextend.sv
-│   ├── execute
-│   │   ├── alu.sv
-│   ├── fetch
-│   │   ├── fetch_top.sv
-│   │   ├── instr_mem.sv
-│   │   └── pc_register.sv
-│   ├── memory
-│   │   ├── datamem.sv
-│   └── top.sv
-└── tb
-    ├── asm
-    │   ├── 1_addi_bne.s
-    │   ├── 2_li_add.s
-    │   ├── 3_lbu_sb.s
-    │   ├── 4_jal_ret.s
-    │   ├── 5_pdf.s
-    │   ├── f1_fsm.s
-    │   └── f1_fsm_simplified.s
-    ├── assemble.sh
-    ├── bash
-    │   ├── control_test.sh
-    │   ├── decode_top_test.sh
-    │   ├── execute_test.sh
-    │   ├── fetch_test.sh
-    │   ├── memory_test.sh
-    │   ├── reg_file_test.sh
-    │   └── sign_extend_test.sh
-    ├── doit.sh
-    ├── assemble.sh
-    ├── vbuddy.cfg
-    ├── verification.md
-    ├── tests
-    │   ├── cpu_testbench.h
-    │   └── verify.cpp
-
-```
-
 ## Implementation
 
 Pipeline: 5 stages – IF, ID, EX, MEM, WB
@@ -355,4 +396,7 @@ Pipeline: 5 stages – IF, ID, EX, MEM, WB
 
 ## Testing
 
+Despite dedicating several days to debugging our implementation of the cache and pipeline integrated system, we were ultimately unable to get it to pass all of the required tests.
 
+
+![Diagram](images/image.png)
