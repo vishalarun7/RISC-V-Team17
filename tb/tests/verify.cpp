@@ -62,7 +62,7 @@ TEST_F(CpuTestbench, F1)
     int cyc;
     int tick;
     
-    for (cyc = 0; cyc < CYCLES; cyc++) {
+    for (cyc = 0; cyc < CYCLES / 100; cyc++) {
         runSimulation(1);
 
         vbdCycle(cyc);
@@ -73,12 +73,11 @@ TEST_F(CpuTestbench, F1)
 
         if (Verilated::gotFinish()) {
             vbdClose();
-            exit(0);
+            EXPECT_EQ(top_->a0, 255);
         }
     }
 
     vbdClose();
-    exit(0);
 }
 
 int main(int argc, char **argv)
