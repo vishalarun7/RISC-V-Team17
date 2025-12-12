@@ -1,9 +1,21 @@
 # RISC-V-Team17
 
 RISC-V 32I CPU designed as part of the Instruction Architectures and Compilers class.
+Group Members: 
+Vishal Arun (Repo Master)
+Raphael Sinai 
+Nikhil Sarathkumar 
+Emir Alemdar
 
 ---
+## Personal Statements
 
+- [Vishal](#quick-start)
+- [Raph](#single-cycle)
+- [Nikhil](#pipelined)
+- [Emir](#cache)
+
+---
 ## Table of Contents
 
 - [Quick Start](#quick-start)
