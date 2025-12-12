@@ -63,7 +63,6 @@ doit.sh tests/verify.cpp
 |                  | **Hazard Unit**                   |   X    |        |      |      |
 |                  | **System Integration + Debugging**|        |   *    |      |  X   |
 | **Cache**        | **Memory (Refactor)**             |        |   X    |      |      |
-|                  | **Direct-Mapped Cache**           |        |   X    |      |      |
 |                  | **Two-Way Set Associative Cache** |        |   X    |      |      |
 |                  | **System Integration + Debugging**|        |   X    |      |  *   |
 | **Verification** | **F1 Testing**                    |        |        |      |  X   |
@@ -79,12 +78,12 @@ Legend:
 ---
 
 ## Single Cycle
-
+--
 ### Overview
 
 The single-cycle implementation supports the core RV32I subset, including:  
 R-type, I-type (immediate), `lbu`, `sb`, `beq`, `bne`, `jal`, `jalr`, and `lui`.
-
+--
 ### File Structure
 
 
@@ -96,7 +95,7 @@ The `tb` folder contains:
 - VBuddy-related configs/tests (plus generated artefacts such as `*.vcd`)
 
 > Note: only the single-cycle version shows the full `tb` contents for brevity.
-
+--
 ### Instruction Support
 
 | Type     | Instructions                                                    |
@@ -109,7 +108,7 @@ The `tb` folder contains:
 | B        | `beq`, `bne`                                                    |
 | U        | `lui`                                                           |
 | J        | `jal`                                                           |
-
+--
 ### Testing
 
 #### Core Tests
@@ -152,7 +151,7 @@ If any embedded videos fail to load, open them directly from `./images/vbuddy_te
 ---
 
 ## Pipelined
-
+--
 ### Overview
 
 The pipelined implementation supports the full RV32I instruction set.  
@@ -164,7 +163,7 @@ The CPU is split into four main stages:
 4. Memory / Writeback  
 
 Pipelining enables multiple instructions to be in-flight simultaneously, improving throughput compared to the single-cycle design.
-
+--
 ### File Structure
 
 ```
@@ -212,7 +211,7 @@ Pipelining enables multiple instructions to be in-flight simultaneously, improvi
 
 ```
 
-
+--
 ### Implementation Details
 
 #### 1. Pipeline Registers
@@ -245,7 +244,7 @@ Pipelining enables multiple instructions to be in-flight simultaneously, improvi
 
 - On a taken branch or jump, clears the decode pipeline register.  
 - Prevents wrong-path instructions from committing.
-
+--
 ### Testing
 
 Testing follows the same `tb` infrastructure and `doit.sh` flow as in the single-cycle design, with additional checks for correctness under hazards and branches.
@@ -258,7 +257,7 @@ Testing follows the same `tb` infrastructure and `doit.sh` flow as in the single
 
 The cached implementation introduces a data memory hierarchy on top of the single-cycle core.  
 It uses a two-way set-associative, write-back cache to reduce effective memory latency by exploiting spatial and temporal locality.
-
+--
 ### Design Notes
 
 - Organisation: 2-way set-associative data cache.  
@@ -268,7 +267,7 @@ It uses a two-way set-associative, write-back cache to reduce effective memory l
   - Dirty bit (for write-back)  
 - Replacement: LRU-based policy between the two ways.  
 - Write policy: write-back with write-allocate on misses.
-
+--
 ### File Structure
 
 
@@ -317,7 +316,7 @@ It uses a two-way set-associative, write-back cache to reduce effective memory l
 
 ```
 
-
+--
 ### Implementation
 
 At a high level:
@@ -330,7 +329,7 @@ At a high level:
   - Selects a victim way via LRU.  
   - If dirty, writes back to `datamem`.  
   - Fetches the new line, updates tag/valid/dirty, then services the request.
-
+--
 ### Testing
 
 Cache testing reuses the `tb` infrastructure with programs designed to stress:
