@@ -396,7 +396,7 @@ Pipeline: 5 stages – IF, ID, EX, MEM, WB
 
 ## Testing
 
-Despite dedicating several days to debugging our implementation of the cache and pipeline integrated system, we were ultimately unable to get it to pass all of the required tests.
+Despite dedicating several days to debugging our implementation of the cache and pipeline integrated system, we were ultimately unable to get it to pass all of the required tests. 
 
 
-![Diagram](images/image.png)
+![Diagram](images/cachefinal.png)
