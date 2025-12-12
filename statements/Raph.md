@@ -23,7 +23,7 @@ These include:
 Most of my work for single cycle was therefore debugging and ALU implementation.
 
 
-### F1 Testing
+### F1 Testing
 
 I was in charge of implementing the F1 sequence.
 
