@@ -1,7 +1,10 @@
 # Details
 
 Full name: Emir Alemdar
+
 CID: 02616887
+
+Github Username: Emiral46
 
 # Summary of What I did in this preoject
 
