@@ -8,6 +8,8 @@
 
 #define CYCLES 10000
 
+#define F1_CYCLES 120
+
 TEST_F(CpuTestbench, TestAddiBne)
 {
     setupTest("1_addi_bne");
@@ -40,6 +42,54 @@ TEST_F(CpuTestbench, TestJalRet)
     EXPECT_EQ(top_->a0, 53);
 }
 
+TEST_F(CpuTestbench, TestBeq)
+{
+    setupTest("test_beq");
+    initSimulation();
+    runSimulation(CYCLES);
+    EXPECT_EQ(top_->a0, 5);
+}
+
+TEST_F(CpuTestbench, TestBne)
+{
+    setupTest("test_bne");
+    initSimulation();
+    runSimulation(CYCLES);
+    EXPECT_EQ(top_->a0, 5);
+}
+
+TEST_F(CpuTestbench, TestBlt)
+{
+    setupTest("test_blt");
+    initSimulation();
+    runSimulation(CYCLES);
+    EXPECT_EQ(top_->a0, 6);
+}
+
+TEST_F(CpuTestbench, TestBge)
+{
+    setupTest("test_bge");
+    initSimulation();
+    runSimulation(CYCLES);
+    EXPECT_EQ(top_->a0, 7);
+}
+
+TEST_F(CpuTestbench, TestBltu)
+{
+    setupTest("test_bltu");
+    initSimulation();
+    runSimulation(CYCLES);
+    EXPECT_EQ(top_->a0, 6);
+}
+
+TEST_F(CpuTestbench, TestBgeu)
+{
+    setupTest("test_bgeu");
+    initSimulation();
+    runSimulation(CYCLES);
+    EXPECT_EQ(top_->a0, 7);
+}
+
 TEST_F(CpuTestbench, TestPdf)
 {
     setupTest("5_pdf");
@@ -62,7 +112,7 @@ TEST_F(CpuTestbench, F1)
     int cyc;
     int tick;
     
-    for (cyc = 0; cyc < CYCLES / 100; cyc++) {
+    for (cyc = 0; cyc < F1_CYCLES; cyc++) {
         runSimulation(1);
 
         vbdCycle(cyc);
@@ -73,7 +123,7 @@ TEST_F(CpuTestbench, F1)
 
         if (Verilated::gotFinish()) {
             vbdClose();
-            return;
+            EXPECT_EQ(top_->a0, 255);
         }
     }
 

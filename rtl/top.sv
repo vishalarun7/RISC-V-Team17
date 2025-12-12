@@ -156,12 +156,12 @@ module top #(
     logic BranchCondE;
     always_comb begin
         case (funct3E)
-            3'b000: BranchCondE = ZeroE;              // beq: branch if equal
-            3'b001: BranchCondE = ~ZeroE;             // bne: branch if not equal
-            3'b100: BranchCondE = ALUResultE[0];      // blt: branch if less than (signed)
-            3'b101: BranchCondE = ~ALUResultE[0];     // bge: branch if greater or equal (signed)
-            3'b110: BranchCondE = ALUResultE[0];      // bltu: branch if less than (unsigned)
-            3'b111: BranchCondE = ~ALUResultE[0];     // bgeu: branch if greater or equal (unsigned)
+            3'b000: BranchCondE = ZeroE;                           // beq: branch if equal (SUB result is zero)
+            3'b001: BranchCondE = ~ZeroE;                          // bne: branch if not equal (SUB result is not zero)
+            3'b100: BranchCondE = ALUResultE[0];                   // blt: branch if less than (SLT result is 1)
+            3'b101: BranchCondE = ~ALUResultE[0];                  // bge: branch if >= (SLT result is 0)
+            3'b110: BranchCondE = ALUResultE[0];                   // bltu: branch if less than unsigned (SLTU result is 1)
+            3'b111: BranchCondE = ~ALUResultE[0];                  // bgeu: branch if >= unsigned (SLTU result is 0)
             default: BranchCondE = 1'b0;
         endcase
     end

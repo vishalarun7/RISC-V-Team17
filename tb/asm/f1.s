@@ -17,4 +17,5 @@ incr:
     JALR x0, 0(t1)  
 
 finish:
+    addi a4, zero, 1
     J finish

@@ -90,7 +90,15 @@ module control(
 
         // B-type
         7'b1100011: begin 
-            RegWrite = 1'b0; ImmSrc = 3'b010; ALUSrc = 1'b0; ALUControl = 4'b0001; MemWrite = 1'b0; Branch = 1'b1; Jump = 1'b0;
+            RegWrite = 1'b0; ImmSrc = 3'b010; ALUSrc = 1'b0; MemWrite = 1'b0; Branch = 1'b1; Jump = 1'b0;
+            // Set ALU operation based on branch type
+            case (funct3)
+                3'b100: ALUControl = 4'b1000;  // blt: use SLT (signed less than)
+                3'b101: ALUControl = 4'b1000;  // bge: use SLT (signed less than)
+                3'b110: ALUControl = 4'b1001;  // bltu: use SLTU (unsigned less than)
+                3'b111: ALUControl = 4'b1001;  // bgeu: use SLTU (unsigned less than)
+                default: ALUControl = 4'b0001; // beq/bne: use SUB
+            endcase
         end
 
         // U-type (lui)
