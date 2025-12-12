@@ -280,6 +280,10 @@ Single-cycle verification image:
 - Video: `tb/videos/singlecycle.mp4`
 
 
+
+https://github.com/user-attachments/assets/74878673-e18f-44e6-b8f7-a173b9925cf6
+
+
 #### PDF: Gaussian
 
 - Video: `tb/videos/gauss.mp4`
@@ -396,7 +400,7 @@ Pipeline: 5 stages – IF, ID, EX, MEM, WB
 
 ## Testing
 
-Despite dedicating several days to debugging our implementation of the cache and pipeline integrated system, we were ultimately unable to get it to pass all of the required tests. 
+Despite dedicating several days to debugging our implementation of the cache and pipeline integrated system, we were ultimately only able to get it to pass 4/5 of the required tests. 
 
 
 ![Diagram](images/cachefinal.png)
