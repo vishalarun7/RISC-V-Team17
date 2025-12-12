@@ -224,7 +224,7 @@ assign FlushD = PCSrcE;
 ```
 
 ## Testing
-![All 5 Tests passed](RISC-V-Team17/images/Screenshot 2025-12-12 at 6.18.42 PM.png)
+![All 5 Tests passed](pipelinetest.png)
 
 During testing, the most significant issue encountered was related to the LUI (Load Upper Immediate) instruction. In RISC-V, lui loads a 20-bit immediate into the upper bits of a register, and it is also used internally when assembling large constants — for example, the li pseudo-instruction often expands into a combination of LUI + ADDI.
 
