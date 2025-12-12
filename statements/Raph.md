@@ -11,6 +11,8 @@ I worked as the verification engineer, debugging most of the errors and fixing w
 
 ## top.sv for single cycle
 
+> The following can be found on the main branch
+
 Following the original diagram for the single cycle cpu and my team's implementation of each module, I created the [top.sv](https://github.com/vishalarun7/RISC-V-Team17/blob/main/rtl/top.sv) file.
 
 After generating this file, I ran all of the tests and had to fix the problems that arose in each of them.
@@ -24,6 +26,8 @@ Most of my work for single cycle was therefore debugging and ALU implementation.
 
 
 ### F1 Testing
+
+VIDEO: [LINK TO SINGLE CYCLE F1 VIDEO](https://github.com/vishalarun7/RISC-V-Team17/blob/main/tb/videos/singlecycle.mp4)
 
 I was in charge of implementing the F1 sequence.
 
@@ -117,6 +121,8 @@ This code uses the functions provided in `cpu_testbench.h` and `vbuddy.cpp` to d
 
 ## Debugging for pipeline
 
+> The following can be found on the pipelined branch
+
 Ensuring that the pipelined CPU worked was much trickier than the single cycle CPU. For each of these changes, an extensive use of gtkwave was very helpful to visualise which instruction was failing.
 
 ### Inital testing
@@ -202,3 +208,37 @@ assign RD2 = (AD2 == 0) ? 0 :
 ```
 
 ### F1 testing in pipeline
+
+VIDEO: [LINK TO PIPELINED F1 VIDEO](https://github.com/vishalarun7/RISC-V-Team17/blob/main/tb/videos/pipeline.mp4)
+
+When running the F1 test, it was failing after setting the register s1 to 8. I found this to be due to `BGE a1, s1, finish` incorrectly jumping the first time it is called.
+
+I decided that I would fix all the branching functions.
+
+The following block of logic had to be added to the ALU
+
+```sv
+7'b1100011: begin
+    RegWrite = 1'b0; ImmSrc = 3'b010; ALUSrc = 1'b0; MemWrite = 1'b0; Branch = 1'b1; Jump = 1'b0;
+    // Set ALU operation based on branch type
+    case (funct3)
+        3'b100: ALUControl = 4'b1000;  // blt: use SLT (signed less than)
+        3'b101: ALUControl = 4'b1000;  // bge: use SLT (signed less than)
+        3'b110: ALUControl = 4'b1001;  // bltu: use SLTU (unsigned less than)
+        3'b111: ALUControl = 4'b1001;  // bgeu: use SLTU (unsigned less than)
+        default: ALUControl = 4'b0001; // beq/bne: use SUB
+    endcase
+end
+```
+
+To make sure that all of the branches work I added the following tests to keep track of why exactly each instruction fails if it does:
+- test_beq.s
+- test_bge.s
+- test_bgeu.s
+- test_blt.s
+- test_bltu.s
+- test_bne.s
+
+### Final mass testing
+
+Now that crucial tests are working as intended
