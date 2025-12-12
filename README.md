@@ -52,10 +52,12 @@ doit.sh tests/verify.cpp
 |                  | **Execute–Memory Pipeline**       |   X    |        |      |      |
 |                  | **Memory–Writeback Pipeline**     |   X    |        |      |      |
 |                  | **Hazard Unit**                   |   X   |      |      |      |
-|                  | **System Integration + Debugging**|      |      |      |   X   |
+|                  | **System Integration + Debugging**|      |    *  |      |   X   |
 | **Cache**        | **Memory (Refactor)**             |        |    X    |      |      |
 |                  | **Direct-Mapped Cache**           |        |     X   |      |      |
 |                  | **Two-Way Set Associative Cache** |        |      X  |      |      |
+|                  | **System Integration + Debugging** |        |      X  |      |   *   |
+
 | **Verification** | **F1 Testing**                    |        |        |      |  X   |
 |                  | **PDF Testing**                   |        |        |      |  X   |
 |                  | **System Testing & Debugging**    |        |        |      |  X   |
@@ -66,8 +68,9 @@ doit.sh tests/verify.cpp
 **X = Lead Contributor**  
 **\* = Partial Contributor**
 
-Single Cycle - 
+## Single Cycle - 
 This single cycle implementation covers the basic requirements for most CPU operations, this implements the following instructions: R-type, I-type (immediate), lbu, sb, beq, bne, jal, jalr, lui.
+
 
 ## File Structure
 
@@ -77,21 +80,16 @@ This single cycle implementation covers the basic requirements for most CPU oper
 │   ├── adder.sv
 │   ├── decode
 │   │   ├── control.sv
-│   │   ├── decode_top.sv
 │   │   ├── reg_file.sv
 │   │   └── signextend.sv
 │   ├── execute
 │   │   ├── alu.sv
-│   │   └── execute_top.sv
 │   ├── fetch
 │   │   ├── fetch_top.sv
 │   │   ├── instr_mem.sv
 │   │   └── pc_register.sv
 │   ├── memory
 │   │   ├── datamem.sv
-│   │   └── memory_top.sv
-│   ├── mux.sv
-│   ├── mux_4x2.sv
 │   └── top.sv
 └── tb
     ├── asm
@@ -112,43 +110,19 @@ This single cycle implementation covers the basic requirements for most CPU oper
     │   ├── reg_file_test.sh
     │   └── sign_extend_test.sh
     ├── doit.sh
-    ├── f1_test.sh
-    ├── our_tests
-    │   ├── control_test_tb.cpp
-    │   ├── datamem_tb.cpp
-    │   ├── decode_top_test_tb.cpp
-    │   ├── execute_tb.cpp
-    │   ├── fetch_tb.cpp
-    │   ├── memory_tb.cpp
-    │   ├── reg_file_test_tb.cpp
-    │   └── signextend_test_tb.cpp
-    ├── pdf_test
-    ├── pdf_test.sh
-    ├── reference
-    ├── test_out
-    │   ├── 1_addi_bne
-    │   ├── 2_li_add
-    │   ├── 3_lbu_sb
-    │   ├── 4_jal_ret
-    │   ├── 5_pdf
-    │   └── obj_dir
+    ├── assemble.sh
+    ├── vbuddy.cfg
+    ├── verification.md
     ├── tests
     │   ├── cpu_testbench.h
     │   └── verify.cpp
-    ├── two_way_cache_top.vcd
-    ├── vbuddy.cfg
-    ├── vbuddy_test
-    │   ├── f1_fsm_tb.cpp
-    │   ├── pdf_tb.cpp
-    │   └── vbuddy.cpp
-    └── verification.md
+
 ```
 
 The processor development is done in the register transfer level (`rtl`) folder and the testing is performed in the test bench folder (`tb`).
 The test bench folder contains:
 - Assembly files (1 to 5 provided and f1_fsm) - in later versions
 - `assemble.sh` - translating RISCV assembly to machine code
-- `bash` and `out_tests` - independently created testing cases for individual components
 - `vbuddy_test` - Tests creating to verify RISCV performance with VBuddy (provided)
 Other files are either a result of these files (testing outputs e.g. `*.vcd`) or were provided.
 
@@ -169,7 +143,7 @@ Instructions implemented:
 | J        | `jal`                                                          |
 
 ## Testing
-### Test cases
+
 ##### Note: if any of the videos fail to load, please find the videos in `./images/vbuddy_tests/`
 
 For the tests provided (`1_addi_bne` `2_li_add` `3_lbu_sb` `4_jal_ret` `5_pdf`):
@@ -195,3 +169,56 @@ For the tests provided (`1_addi_bne` `2_li_add` `3_lbu_sb` `4_jal_ret` `5_pdf`):
 ![Video for PDF: Triangle test](images/vbuddy_tests/PDF-Triangle.gif)
 
 [Link to Video (Higher Quality)](/images/vbuddy_tests/PDF-Triangle.mp4)
+
+-- 
+
+## Pipelined -
+The pipelined implementation supports the RV32I instruction set, dividing the processor into four main stages: fetch, decode, execute, and memory. The fundamental principle of pipelining is parallel instruction execution, where different stages of multiple instructions are processed simultaneously. This increases instruction throughput and, in real-world CPUs, enables higher clock speeds. Together, these improvements result in faster program execution compared to the single-cycle variant.
+
+## File Structure
+
+```
+.
+├── rtl
+│   ├── adder.sv
+│   ├── decode
+│   │   ├── control.sv
+│   │   ├── reg_file.sv
+│   │   └── signextend.sv
+│   ├── execute
+│   │   ├── alu.sv
+│   ├── fetch
+│   │   ├── fetch_top.sv
+│   │   ├── instr_mem.sv
+│   │   └── pc_register.sv
+│   ├── memory
+│   │   ├── datamem.sv
+│   └── top.sv
+└── tb
+    ├── asm
+    │   ├── 1_addi_bne.s
+    │   ├── 2_li_add.s
+    │   ├── 3_lbu_sb.s
+    │   ├── 4_jal_ret.s
+    │   ├── 5_pdf.s
+    │   ├── f1_fsm.s
+    │   └── f1_fsm_simplified.s
+    ├── assemble.sh
+    ├── bash
+    │   ├── control_test.sh
+    │   ├── decode_top_test.sh
+    │   ├── execute_test.sh
+    │   ├── fetch_test.sh
+    │   ├── memory_test.sh
+    │   ├── reg_file_test.sh
+    │   └── sign_extend_test.sh
+    ├── doit.sh
+    ├── assemble.sh
+    ├── vbuddy.cfg
+    ├── verification.md
+    ├── tests
+    │   ├── cpu_testbench.h
+    │   └── verify.cpp
+
+```
+
