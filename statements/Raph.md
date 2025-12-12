@@ -72,6 +72,10 @@ In incr after each instruction:
 
 This means that operations are done in the registers not outputted and only the final stage is written to `a0` the output register.
 
+After this, the code jumps back to the _loop section where this sequence is repeated until all 8 bits are 1.
+
+When all bits are 8, the program infinitely loops until terminated by verilator.
+
 
 ## Debugging for pipeline
 
