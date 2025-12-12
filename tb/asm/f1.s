@@ -14,7 +14,7 @@ incr:
     ADDI a1, a1, 1
     SLLI a2, a0, 1
     ADDI a0, a2, 1
-    JALR x0, 0(t1)  
+    J _loop
 
 finish:
     addi a4, zero, 1
