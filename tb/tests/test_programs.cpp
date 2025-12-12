@@ -6,7 +6,17 @@
 
 #include "cpu_testbench.h"
 
+#define CYCLES 10000
 #define F1_CYCLES 120
+
+TEST_F(CpuTestbench, TestPdf)
+{
+    setupTest("5_pdf");
+    setData("reference/gaussian.mem");
+    initSimulation();
+    runSimulation(CYCLES * 100);
+    EXPECT_EQ(top_->a0, 15363);
+}
 
 TEST_F(CpuTestbench, F1)
 {

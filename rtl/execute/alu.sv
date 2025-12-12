@@ -16,7 +16,7 @@ module alu #(
             4'b0011: ALUResult = SrcA | SrcB;                    // or
             4'b0100: ALUResult = SrcA ^ SrcB;                    // xor
             4'b0101: ALUResult = SrcA << SrcB[4:0];              // sll
-            4'b0110: ALUResult = SrcA >>> SrcB[4:0];             // sra
+            4'b0110: ALUResult = $signed(SrcA) >>> SrcB[4:0];    // sra (arithmetic shift with sign extension)
             4'b0111: ALUResult = SrcA >> SrcB[4:0];              // srl
             4'b1000: ALUResult = ($signed(SrcA) < $signed(SrcB)) ? 32'd1 : 32'd0;  // slt
             4'b1001: ALUResult = (SrcA < SrcB) ? 32'd1 : 32'd0;  // sltu

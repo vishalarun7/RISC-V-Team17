@@ -13,8 +13,10 @@ if [[ $# -eq 0 ]]; then
 fi
 
 input_file=$1
-basename=$(basename "$input_file" | sed 's/\.[^.]*$//')
-parent=$(dirname "$input_file")
+# Get the relative path from input, removing the file extension
+# This preserves directory structure like "utype/lui_basic"
+relative_path="${input_file#*/}" # Remove first directory (e.g., "asm/")
+basename=$(echo "$relative_path" | sed 's/\.[^.]*$//')
 file_extension="${input_file##*.}"
 LOG_DIR="$SCRIPT_DIR/test_out/$basename"
 
