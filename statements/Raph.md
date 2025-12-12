@@ -249,20 +249,57 @@ To make my life easier, I modified `doit.sh` a bit to always use `top` instead o
 
 The following tests were added:
 
-- Branch:
-    - beq_equal.s
-    - beq_negative.s
-    - beq_not_equal.s
-    - beq_zero.s
-    - bge_equal.s
-    - bge_greater.s
-    - bge_less.s
-    - bgeu_greater.s
-    - bgeu_unsigned.s
-    - blt_less.s
-    - blt_greater.s
-    - blt_negative.s
-    - bltu_less.s
-    - bltu_unsigned.s
-    - bne_not_equal.s
-    - bne_equal.s
+**Branch:**
+- beq_equal.s
+- beq_negative.s
+- beq_not_equal.s
+- beq_zero.s
+- bge_equal.s
+- bge_greater.s
+- bge_less.s
+- bgeu_greater.s
+- bgeu_unsigned.s
+- blt_greater.s
+- blt_negative.s
+- blt_positive.s
+- bltu_small.s
+- bltu_unsigned.s
+- bne_equal.s
+- bne_not_equal.s
+
+**I-Type:**
+- andi_mask.s
+- ori_set.s
+- slli_shift.s
+- slti_false.s
+- slti_true.s
+- sltiu_unsigned.s
+- srai_negative.s
+- srli_shift.s
+- xori_toggle.s
+
+**Memory:**
+- lw_sw_basic.s
+- lw_sw_offset.s
+
+**Pipeline:**
+- 1_add.s
+- 2_add_sub.s
+- 3_l_hazard.s
+- 4_s_hazard.s
+
+**R-Type:**
+- and_bitwise.s
+- or_bitwise.s
+- sll_shift.s
+- slt_false.s
+- slt_true.s
+- sltu_unsigned.s
+- sra_negative.s
+- srl_shift.s
+- sub_basic.s
+- xor_bitwise.s
+
+**U-Type:**
+- lui_addi.s
+- lui_basic.s
