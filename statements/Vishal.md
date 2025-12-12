@@ -108,6 +108,8 @@ else if (MemWrite) ram_array[aluresult] <= RD2[7:0];
 
 # Pipelined
 
+![Diagram](../images/harris.png)
+
 Pipelining enables multiple instructions to be in-flight simultaneously, improving throughput compared to the single-cycle design. The pipelined implementation splits the CPU into 5 main stages:
 1. Fetch  
 2. Decode  
@@ -224,7 +226,8 @@ assign FlushD = PCSrcE;
 ```
 
 ## Testing
-![Pipelined tests](./images/pipelinetest.png)
+![Pipeline tests](../images/pipelinetest.png)
+
 
 
 During testing, the most significant issue encountered was related to the LUI (Load Upper Immediate) instruction. In RISC-V, lui loads a 20-bit immediate into the upper bits of a register, and it is also used internally when assembling large constants — for example, the li pseudo-instruction often expands into a combination of LUI + ADDI.
