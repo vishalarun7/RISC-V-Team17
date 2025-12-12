@@ -288,9 +288,12 @@ https://github.com/user-attachments/assets/74878673-e18f-44e6-b8f7-a173b9925cf6
 
 - Video: `tb/videos/gauss.mp4`
 
+(If too large to render -> see tb/videos)
+
 #### PDF: Noisy
 
 - Video: `images/vbuddy_tests/noisy.mp4`
+
 
 #### PDF: Triangle
 
